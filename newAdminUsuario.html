@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Administrador</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; border: 1px solid #ccc; padding: 20px; border-radius: 5px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="password"] { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Registro de Nuevo Administrador</h2>
+    
+    <form action="phpRegistrarAdm.php" method="POST">
+        
+        <label for="admUsuario">Usuario de Login (admUsuario):</label>
+        <input type="text" id="admUsuario" name="admUsuario" required>
+        
+        <label for="admNombre">Nombre Completo (admNombre):</label>
+        <input type="text" id="admNombre" name="admNombre" required>
+        
+        <label for="admCorreo">Correo Electrónico (admCorreo):</label>
+        <input type="email" id="admCorreo" name="admCorreo" required> 
+        
+        <label for="admTelefono">Teléfono (admTelefono):</label>
+        <input type="tel" id="admTelefono" name="admTelefono" required> 
+        
+        <label for="password">Contraseña (password):</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit">Registrar Administrador</button>
+    </form>
+</div>
+
+</body>
+</html>
