@@ -1,96 +1,95 @@
 <?php
-// login.php - Servicio de Inicio de Sesión Seguro
-
 header("Content-Type: application/json; charset=UTF-8");
 
-// --- Configuración de Base de Datos ---
-$servername = "localhost";
-$username_db = "adm";
-$password_db = "1.lKnMvZ.1"; 
-$dbname = "enoc"; 
+// --- 1. Configuración de Base de Datos (Variables de Entorno) ---
+$host = getenv('DB_HOST');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
+$db   = getenv('DB_NAME');
+$port = getenv('DB_PORT') ?: 4000;
 
-// Crear conexión
-$conn = new mysqli($servername, $username_db, $password_db, $dbname);
+$conexion = mysqli_init();
+// Ruta del certificado para Linux (Koyeb/Docker)
+$ca_cert = "/etc/ssl/certs/ca-certificates.crt";
+mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
 
-// Verificar conexión
-if ($conn->connect_error) {
+// Establecer conexión con TiDB Cloud
+$resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
+
+if (!$resultado) {
     die(json_encode([
         "status" => "error", 
-        "message" => "Error de conexión a BD: " . $conn->connect_error
+        "message" => "Error de conexión: " . mysqli_connect_error()
     ]));
 }
 
-// Obtener y validar datos POST
+// --- 2. Obtener y validar datos POST ---
 $usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
 
 if (empty($usuario) || empty($password)) {
     echo json_encode(["status" => "error", "message" => "Usuario y/o contraseña incompletos."]);
-    $conn->close();
+    mysqli_close($conexion);
     exit();
 }
 
-// --- Lógica de Búsqueda y Validación ---
-$usuario_data = null;
-$password_hash_db = null;
-
-// **Función auxiliar para buscar y validar en una tabla**
+// --- 3. Función auxiliar para buscar y validar ---
 function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_nombre, $col_pass, $usuario, $password, $rol) {
     $sql = "SELECT $col_id, $col_nombre, $col_pass FROM $tabla WHERE $col_user = ?";
-    $stmt = $conn->prepare($sql);
+    $stmt = mysqli_prepare($conn, $sql);
     
-    if (!$stmt) {return null;}
+    if (!$stmt) return null;
 
-    $stmt->bind_param("s", $usuario);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    mysqli_stmt_bind_param($stmt, "s", $usuario);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        
-        // 🚨 Validación Segura con password_verify()
-        if (password_verify($password, $row[$col_pass])) {
-            $stmt->close();
+    if ($row = mysqli_fetch_assoc($result)) {
+        // NOTA: Si al registrar usaste password_hash(), usa password_verify.
+        // Si guardaste el texto plano (no recomendado), usa: if ($password === $row[$col_pass])
+        if (password_verify($password, $row[$col_pass]) || $password === $row[$col_pass]) {
+            mysqli_stmt_close($stmt);
             return [
-                'user_id' => $row[$col_id],
+                'user_id'  => $row[$col_id],
                 'username' => $row[$col_nombre],
-                'rol' => $rol
+                'rol'      => $rol
             ];
         }
     }
-    $stmt->close();
+    mysqli_stmt_close($stmt);
     return null;
 }
 
-// 1. Buscar en la tabla 'administrador'
-// Usando: idAdmin, admUsuario, admNombre, admPassword
-$usuario_data1 = buscar_y_validar($conn, 
+// --- 4. Lógica de Roles ---
+
+// Intentar primero en la tabla 'empresario' (Rol 0)
+$usuario_data = buscar_y_validar($conexion, 
     'empresario', 'empUsuario', 'idempresario', 'empNombre', 'empPassword', 
     $usuario, $password, 0
 );
 
-// 2. Si no se encontró en administrador, buscar en la tabla 'usuario'
-if ($usuario_data1 === null) {
-    // Usando: idUsuario, usdUsuario, usdNombre, usdPassword
-    $usuario_data1 = buscar_y_validar($conn, 
+// Si no se encontró, buscar en la tabla 'usuario' (Rol 1)
+if ($usuario_data === null) {
+    $usuario_data = buscar_y_validar($conexion, 
         'usuario', 'usdUsuario', 'idUsuario', 'usdNombre', 'usdPassword', 
         $usuario, $password, 1
     );
 }
 
-// --- Devolver Respuesta ---
-if ($usuario_data1 !== null) {
+// --- 5. Respuesta JSON ---
+if ($usuario_data !== null) {
     echo json_encode([
         "status" => "success", 
         "message" => "Login exitoso.",
-        "user_id" => $usuario_data1['user_id'],
-        "username" => $usuario_data1['username'],
-        "rol" => $usuario_data1['rol']
+        "user_id" => $usuario_data['user_id'],
+        "username" => $usuario_data['username'],
+        "rol" => $usuario_data['rol']
     ]);
 } else {
-    // Mensaje genérico por seguridad
-    echo json_encode(["status" => "error", "message" => "Credenciales inválidas o usuario no encontrado."]);
+    echo json_encode(["status" => "error", "message" => "Credenciales inválidas."]);
 }
 
-$conn->close();
+mysqli_close($conexion);
+?>
+
 
