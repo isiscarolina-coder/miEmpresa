@@ -36,7 +36,7 @@ $passHash = password_hash($password, PASSWORD_DEFAULT);
 $sql = "INSERT INTO usuarios (usdNombre, usdUsuario, usdPassword, usdCorreo, usdTelefono, operador, usdEstado, idEmpresario) 
         VALUES (?, ?, ?, ?, ?, 1, 1, ?)";
 
-$stmt = $conn->prepare($sql);
+$stmt = $conexion->prepare($sql);
 $stmt->bind_param("sssssi", $nombre, $usuario, $passHash, $correo, $telefono, $idAdmin);
 
 if ($stmt->execute()) {
@@ -52,6 +52,6 @@ if ($stmt->execute()) {
 }
 
 $stmt->close();
-$conn->close();
+$conexion->close();
 ?>
 
