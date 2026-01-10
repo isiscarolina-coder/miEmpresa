@@ -1,4 +1,8 @@
 <?php
+// 1. Desactivar la visualización de errores HTML
+error_reporting(0);
+ini_set('display_errors', 0);
+
 // Permitir acceso desde cualquier origen (CORS) y configurar tipo JSON
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
