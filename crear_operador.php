@@ -51,7 +51,7 @@ if ($stmt->execute()) {
 } else {
     echo json_encode([
         "status" => "error", 
-        "message" => "Error al insertar: " . $conn->error
+        "message" => "Error al insertar: " . $conexion->error
     ]);
 }
 
