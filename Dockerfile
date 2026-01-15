@@ -8,9 +8,8 @@ RUN apt-get update && apt-get install -y ca-certificates \
 # Copiamos tus archivos PHP al contenedor
 COPY . /var/www/html/
 
-# Ajustamos permisos
-RUN chown -R www-data:www-data /var/www/html
+# --- ESTA LÍNEA ES LA QUE CORRIGE EL ERROR 403 ---
+# Da permisos de lectura y ejecución a la carpeta web
+RUN chmod -R 755 /var/www/html && chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
-
-
