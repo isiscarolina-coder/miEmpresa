@@ -4,7 +4,7 @@ include 'conexion.php';
 header("Content-Type: application/json; charset=UTF-8");
 
 // Solo obtenemos usuarios que sean operadores (rol = 1)
-$sql = "SELECT idusuario, usdUsuario, usdPassword, usdEstado FROM usuarios";
+$sql = "SELECT idusuario, usdUsuario, usdPassword, usdEstado FROM usuario";
 $result = $conexion->query($sql);
 
 $operadores = array();
@@ -19,4 +19,5 @@ if ($result->num_rows > 0) {
 }
 
 $conexion->close();
+
 ?>
