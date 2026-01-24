@@ -9,6 +9,9 @@ header("Content-Type: application/json; charset=UTF-8");
 $json_input = file_get_contents("php://input");
 $datos = json_decode($json_input, true);
 
+// 2. INICIALIZAR LA VARIABLE
+$usuario_data = null;
+
 // Extraer las variables del JSON
 $usuario = isset($datos['usuario']) ? trim($datos['usuario']) : '';
 $password = isset($datos['password']) ? $datos['password'] : '';
@@ -78,10 +81,13 @@ if ($usuario_data !== null) {
         "message" => "Login exitoso.",
         "user_id" => (string)$usuario_data['user_id'],
         "username" => $usuario_data['username'],
-        "rol" => $usuario_data['rol']
+        "rol" => (string)$usuario_data['rol']
     ]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Credenciales invalidas."]);
+    echo json_encode([
+        "status" => "error", 
+        "message" => "Credenciales inválidas."
+    ]);
 }
 mysqli_close($conexion);
 ?>
