@@ -61,14 +61,14 @@ $usuario_data = null;
 
 // Intentar primero como EMPRESARIO (Rol 0)
 $usuario_data = buscar_y_validar($conexion, 
-    'empresario', 'empUsuario', 'idempresario', 'empNombre', 'empPassword', 
+    'empresario', 'idempresario', 'empNombre', 'empPassword', 
     $usuario, $password, 0
 );
 
 // Si no es empresario, intentar como USUARIO/OPERADOR (Rol 1)
 if ($usuario_data === null) {
     $usuario_data = buscar_y_validar($conexion, 
-        'usuario', 'usdUsuario', 'idUsuario', 'usdNombre', 'usdPassword', 
+        'usuario', 'idUsuario', 'usdNombre', 'usdPassword', 
         $usuario, $password, 1
     );
 }
