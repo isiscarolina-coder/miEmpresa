@@ -32,8 +32,8 @@ if (empty($usuario) || empty($password)) {
 }
 
 // 3. Función de validación (Asegúrate de que los nombres de columnas sean correctos)
-function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_nombre, $col_pass, $usuario, $password, $rol) {
-    $sql = "SELECT $col_id, $col_nombre, $col_pass FROM $tabla WHERE $col_user = ?";
+function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_pass, $usuario, $password, $rol) {
+    $sql = "SELECT $col_id, $col_pass FROM $tabla WHERE $col_user = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if (!$stmt) return null;
 
