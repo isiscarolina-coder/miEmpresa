@@ -145,7 +145,7 @@ if ($stmt === false) {
     ], 500);
 }
 
-$stmt->bind_param($usuario, $passHash, $idAdmin);
+$stmt->bind_param("ssi", $usuario, $passHash, $idAdmin);
 
 if (!$stmt->execute()) {
     $err = $stmt->error;
