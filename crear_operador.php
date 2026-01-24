@@ -4,18 +4,8 @@
  * Optimizado para Koyeb/TiDB Cloud con SSL y Docker
  */
 
-//declare(strict_types=1);
-
-// --- Configuración global ---
-///error_reporting(0);
-//ini_set('display_errors', '0');
-//error_reporting(E_ALL);
-//ini_set('display_errors', '1');
-
-header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 
 // --- Helper para respuesta JSON ---
 function json_response(array $payload, int $code = 200): void {
