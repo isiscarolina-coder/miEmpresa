@@ -1,6 +1,6 @@
    <?php
-error_reporting(0);
-ini_set('display_errors', 0);
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 // Credenciales (Prioriza las de Koyeb)
 $host = getenv('DB_HOST') ?: "gateway01.us-east-1.prod.aws.tidbcloud.com";
