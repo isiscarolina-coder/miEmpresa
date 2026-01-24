@@ -23,7 +23,7 @@ if (!$resultado) {
 mysqli_set_charset($conexion, "utf8");
 
 // Consulta para obtener operadores
-$sql = "SELECT idusuario, usdUsuario, usdEstado FROM usuarios WHERE operador = 1";
+$sql = "SELECT idusuario, usdUsuario, usdEstado FROM usuario WHERE operador = 1";
 $res = $conexion->query($sql);
 
 $operadores = array();
@@ -39,6 +39,7 @@ if ($res) {
 
 $conexion->close();
 ?>
+
 
 
 
