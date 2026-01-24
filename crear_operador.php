@@ -76,8 +76,8 @@ if ($passHash === false) {
 
 // --- Parámetros de conexión (usar Env Vars en Docker/Koyeb) ---
 $host = getenv('DB_HOST') ?: "gateway01.us-east-1.prod.aws.tidbcloud.com";
-$user = getenv('DB_USER') ?: "usuario.root";
-$pass = getenv('DB_PASS') ?: "password_seguro";
+$user = getenv('DB_USER') ?: "4Asq3bxQtZ3iP3r.root";
+$pass = getenv('DB_PASS') ?: "Kt7JQCCjn0CTWYAx";
 $db   = getenv('DB_NAME') ?: "test";
 $port = (int)(getenv('DB_PORT') ?: 4000);
 
