@@ -46,14 +46,6 @@ if ($usuario === '' || $password === '') {
     ], 422);
 }
 
-// Validación opcional de longitud mínima de password
-if (strlen($password) < 3) {
-    json_response([
-        "status" => "error",
-        "message" => "La contraseña debe tener al menos 3 caracteres"
-    ], 422);
-}
-
 // --- Hash de contraseña ---
 $passHash = password_hash($password, PASSWORD_DEFAULT);
 if ($passHash === false) {
