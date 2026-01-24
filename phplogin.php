@@ -81,7 +81,7 @@ if ($usuario_data !== null) {
         "rol" => $usuario_data['rol']
     ]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Credenciales inválidas."]);
+    echo json_encode(["status" => "error", "message" => "Credenciales invalidas."]);
 }
 mysqli_close($conexion);
 ?>
