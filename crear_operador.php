@@ -46,19 +46,11 @@ if ($usuario === '' || $password === '') {
     ], 422);
 }
 
-// Validación opcional de correo
-if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-    json_response([
-        "status" => "error",
-        "message" => "Correo no válido"
-    ], 422);
-}
-
 // Validación opcional de longitud mínima de password
-if (strlen($password) < 6) {
+if (strlen($password) < 3) {
     json_response([
         "status" => "error",
-        "message" => "La contraseña debe tener al menos 6 caracteres"
+        "message" => "La contraseña debe tener al menos 3 caracteres"
     ], 422);
 }
 
