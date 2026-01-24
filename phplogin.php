@@ -1,28 +1,19 @@
 <?php
-// Evitar que cualquier error de PHP se imprima y rompa el JSON
-//error_reporting(0);
-//ini_set('display_errors', 0);
-
 header("Content-Type: application/json; charset=UTF-8");
 
-// Leer el JSON que viene de Android
+// 1. Obtener datos del JSON
 $json_input = file_get_contents("php://input");
 $datos = json_decode($json_input, true);
 
-// 2. INICIALIZAR LA VARIABLE
-$usuario_data = null;
-
-// Extraer las variables del JSON
 $usuario = isset($datos['usuario']) ? trim($datos['usuario']) : '';
 $password = isset($datos['password']) ? $datos['password'] : '';
 
-// --- 1. Conexión (Mantén tu lógica de SSL) ---
+// 2. Conexión a TiDB
 $host = getenv('DB_HOST');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 $db   = getenv('DB_NAME');
 $port = getenv('DB_PORT') ?: 4000;
-
 
 $conexion = mysqli_init();
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt";
@@ -34,20 +25,13 @@ if (!$resultado) {
     exit;
 }
 
-// --- 2. LEER JSON (Esto corrige el error raro) ---
-$json_input = file_get_contents("php://input");
-$datos = json_decode($json_input, true);
-
-$usuario = isset($datos['usuario']) ? trim($datos['usuario']) : '';
-$password = isset($datos['password']) ? $datos['password'] : '';
-
 if (empty($usuario) || empty($password)) {
     echo json_encode(["status" => "error", "message" => "Datos incompletos."]);
     mysqli_close($conexion);
     exit();
 }
 
-// --- 3. Función auxiliar (Igual a la tuya pero con password_verify) ---
+// 3. Función de validación (Asegúrate de que los nombres de columnas sean correctos)
 function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_nombre, $col_pass, $usuario, $password, $rol) {
     $sql = "SELECT $col_id, $col_nombre, $col_pass FROM $tabla WHERE $col_user = ?";
     $stmt = mysqli_prepare($conn, $sql);
@@ -58,7 +42,7 @@ function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_nombre, $col_p
     $result = mysqli_stmt_get_result($stmt);
 
     if ($row = mysqli_fetch_assoc($result)) {
-        // Importante: password_verify es para contraseñas hasheadas
+        // Verifica con hash o texto plano
         if (password_verify($password, $row[$col_pass]) || $password === $row[$col_pass]) {
             mysqli_stmt_close($stmt);
             return [
@@ -72,9 +56,24 @@ function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_nombre, $col_p
     return null;
 }
 
-// ... Resto de tu lógica de roles (empresario y luego usuario) ...
+// --- 4. LA PARTE QUE FALTABA: EJECUTAR LA BÚSQUEDA ---
+$usuario_data = null;
 
-// --- 5. Respuesta Final ---
+// Intentar primero como EMPRESARIO (Rol 0)
+$usuario_data = buscar_y_validar($conexion, 
+    'empresario', 'empUsuario', 'idempresario', 'empNombre', 'empPassword', 
+    $usuario, $password, 0
+);
+
+// Si no es empresario, intentar como USUARIO/OPERADOR (Rol 1)
+if ($usuario_data === null) {
+    $usuario_data = buscar_y_validar($conexion, 
+        'usuario', 'usdUsuario', 'idUsuario', 'usdNombre', 'usdPassword', 
+        $usuario, $password, 1
+    );
+}
+
+// 5. Respuesta Final
 if ($usuario_data !== null) {
     echo json_encode([
         "status" => "success", 
@@ -89,7 +88,7 @@ if ($usuario_data !== null) {
         "message" => "Credenciales inválidas."
     ]);
 }
+
 mysqli_close($conexion);
 ?>
-
 
