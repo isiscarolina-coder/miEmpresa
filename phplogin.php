@@ -1,9 +1,17 @@
 <?php
 // Evitar que cualquier error de PHP se imprima y rompa el JSON
-error_reporting(0);
-ini_set('display_errors', 0);
+//error_reporting(0);
+//ini_set('display_errors', 0);
 
 header("Content-Type: application/json; charset=UTF-8");
+
+// Leer el JSON que viene de Android
+$json_input = file_get_contents("php://input");
+$datos = json_decode($json_input, true);
+
+// Extraer las variables del JSON
+$usuario = isset($datos['usuario']) ? trim($datos['usuario']) : '';
+$password = isset($datos['password']) ? $datos['password'] : '';
 
 // --- 1. Conexión (Mantén tu lógica de SSL) ---
 $host = getenv('DB_HOST');
@@ -11,6 +19,7 @@ $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
 $db   = getenv('DB_NAME');
 $port = getenv('DB_PORT') ?: 4000;
+
 
 $conexion = mysqli_init();
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt";
