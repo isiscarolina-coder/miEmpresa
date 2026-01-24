@@ -35,8 +35,11 @@ if (empty($usuario) || empty($password)) {
 function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_pass, $usuario, $password, $rol) {
     $sql = "SELECT $col_id, $col_user, $col_pass FROM $tabla WHERE $col_user = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    if (!$stmt) return null;
-
+    //if (!$stmt) return null;
+if (!$stmt) {
+    error_log("Error SQL en tabla $tabla: " . mysqli_error($conn));
+    return null;
+}
     mysqli_stmt_bind_param($stmt, "s", $usuario);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
