@@ -104,7 +104,7 @@ if (!$connected) {
 mysqli_set_charset($conexion, "utf8");
 
 // --- Verificar duplicados opcional (usuario único) ---
-$checkSql = "SELECT 1 FROM usuarios WHERE usdUsuario = ? LIMIT 1";
+$checkSql = "SELECT 1 FROM usuario WHERE usdUsuario = ? LIMIT 1";
 $checkStmt = $conexion->prepare($checkSql);
 if ($checkStmt === false) {
     json_response([
@@ -132,7 +132,7 @@ if ($checkStmt->num_rows > 0) {
 $checkStmt->close();
 
 // --- Inserción ---
-$sql = "INSERT INTO usuarios 
+$sql = "INSERT INTO usuario 
         (usdUsuario, usdPassword, operador, usdEstado, idEmpresario)
         VALUES (?, ?, 1, 1, ?)";
 
