@@ -33,7 +33,7 @@ if (empty($usuario) || empty($password)) {
 
 // 3. Función de validación (Asegúrate de que los nombres de columnas sean correctos)
 function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_pass, $usuario, $password, $rol) {
-    $sql = "SELECT $col_id, $col_pass FROM $tabla WHERE $col_user = ?";
+    $sql = "SELECT $col_id, $col_user, $col_pass FROM $tabla WHERE $col_user = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if (!$stmt) return null;
 
@@ -47,7 +47,7 @@ function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_pass, $usuario
             mysqli_stmt_close($stmt);
             return [
                 'user_id'  => $row[$col_id],
-                'username' => $row[$col_nombre],
+                'username' => $row[$col_user],
                 'rol'      => $rol
             ];
         }
@@ -61,14 +61,14 @@ $usuario_data = null;
 
 // Intentar primero como EMPRESARIO (Rol 0)
 $usuario_data = buscar_y_validar($conexion, 
-    'empresario', 'idempresario', 'empNombre', 'empPassword', 
+    'empresario', 'idempresario', 'empUsuario', 'empPassword', 
     $usuario, $password, 0
 );
 
 // Si no es empresario, intentar como USUARIO/OPERADOR (Rol 1)
 if ($usuario_data === null) {
     $usuario_data = buscar_y_validar($conexion, 
-        'usuario', 'idUsuario', 'usdNombre', 'usdPassword', 
+        'usuario', 'idUsuario', 'usdUsuario', 'usdPassword', 
         $usuario, $password, 1
     );
 }
