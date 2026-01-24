@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
-error_reporting(0); // Desactivar errores visibles para no ensuciar el JSON
+//error_reporting(0); // Desactivar errores visibles para no ensuciar el JSON
 
 // DATOS DE CONEXIÓN EXPLÍCITOS
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
@@ -40,4 +40,5 @@ if ($res) {
 
 $conexion->close();
 ?>
+
 
