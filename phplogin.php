@@ -57,19 +57,31 @@ function buscar_y_validar($conn, $tabla, $col_user, $col_id, $col_pass, $usuario
 }
 
 // --- 4. LA PARTE QUE FALTABA: EJECUTAR LA BÚSQUEDA ---
+// --- 4. EJECUTAR LA BÚSQUEDA ---
 $usuario_data = null;
 
-// Intentar primero como EMPRESARIO (Rol 0)
+// LLAMADA EMPRESARIO
+// El orden debe ser: conn, tabla, col_id, col_user, col_pass, usuario, pass, rol
 $usuario_data = buscar_y_validar($conexion, 
-    'empresario', 'idempresario', 'empUsuario', 'empPassword', 
-    $usuario, $password, 0
+    'empresario', 
+    'idempresario', // $col_id
+    'empUsuario',   // $col_user
+    'empPassword',  // $col_pass
+    $usuario, 
+    $password, 
+    0
 );
 
-// Si no es empresario, intentar como USUARIO/OPERADOR (Rol 1)
-if ($usuario_data === null) {
+// Si no es empresario, intentar como USUARIO/OPERADOR
+if ($usuario_data == null) {
     $usuario_data = buscar_y_validar($conexion, 
-        'usuario', 'idUsuario', 'usdUsuario', 'usdPassword', 
-        $usuario, $password, 1
+        'usuario', 
+        'idUsuario',   // $col_id
+        'usdUsuario',  // $col_user
+        'usdPassword', // $col_pass
+        $usuario, 
+        $password, 
+        1
     );
 }
 
