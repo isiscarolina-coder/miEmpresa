@@ -34,15 +34,12 @@ if (!is_array($datos)) {
 }
 
 // --- Mapear variables ---
-$nombre   = trim((string)($datos['usdNombre']    ?? ''));
 $usuario  = trim((string)($datos['usdUsuario']   ?? ''));
 $password = (string)($datos['usdPassword']       ?? '');
-$correo   = trim((string)($datos['usdCorreo']    ?? ''));
-$telefono = trim((string)($datos['usdTelefono']  ?? ''));
 $idAdmin  = (int)($datos['idEmpresario']         ?? 0);
 
 // --- Validaciones básicas ---
-if ($nombre === '' || $usuario === '' || $password === '') {
+if ($usuario === '' || $password === '') {
     json_response([
         "status" => "error",
         "message" => "Nombre, Usuario y Password son obligatorios"
@@ -152,8 +149,8 @@ $checkStmt->close();
 
 // --- Inserción ---
 $sql = "INSERT INTO usuarios 
-        (usdNombre, usdUsuario, usdPassword, usdCorreo, usdTelefono, operador, usdEstado, idEmpresario)
-        VALUES (?, ?, ?, ?, ?, 1, 1, ?)";
+        (usdUsuario, usdPassword, operador, usdEstado, idEmpresario)
+        VALUES (?, ?, 1, 1, ?)";
 
 $stmt = $conexion->prepare($sql);
 if ($stmt === false) {
@@ -164,7 +161,7 @@ if ($stmt === false) {
     ], 500);
 }
 
-$stmt->bind_param("sssssi", $nombre, $usuario, $passHash, $correo, $telefono, $idAdmin);
+$stmt->bind_param("sssssi", $usuario, $passHash, $idAdmin);
 
 if (!$stmt->execute()) {
     $err = $stmt->error;
@@ -183,7 +180,7 @@ $conexion->close();
 
 json_response([
     "status" => "success",
-    "message" => "Operador {$nombre} registrado correctamente",
+    "message" => "Operador {$usuario} registrado correctamente",
     "data" => [
         "id" => $insertId,
         "usuario" => $usuario
