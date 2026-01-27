@@ -59,23 +59,34 @@ if (!$connected) {
 
 mysqli_set_charset($conexion, "utf8");
 
-// --- Consulta ---
-// Usamos "usuario" como en tu otro archivo
-$sql = "SELECT idusuario, usdUsuario, usdEstado FROM usuario WHERE operador = 1";
+// --- Capturar el ID del Administrador desde la URL ---
+$idAdmin = isset($_GET['idEmpresario']) ? (int)$_GET['idEmpresario'] : 0;
+
+if ($idAdmin === 0) {
+    echo json_encode(["status" => "error", "message" => "ID de administrador no proporcionado"]);
+    exit;
+}
+
+// --- Consulta FILTRADA por idEmpresario ---
+$sql = "SELECT idusuario, usdUsuario, usdEstado FROM usuario WHERE operador = 1 AND idEmpresario = $idAdmin";
 $res = $conexion->query($sql);
 
 if ($res) {
     $operadores = array();
     while($row = $res->fetch_assoc()) {
-        // Casteo de tipos para asegurar compatibilidad con Android
         $operadores[] = [
             "idusuario"  => (int)$row['idusuario'],
             "usdUsuario" => $row['usdUsuario'],
             "usdEstado"  => (int)$row['usdEstado']
         ];
     }
+    echo json_encode(["status" => "success", "data" => $operadores]);
+} else {
+    echo json_encode(["status" => "error", "message" => $conexion->error]);
+}
+
     
-    // Si no hay datos, enviamos éxito pero con lista vacía
+// Si no hay datos, enviamos éxito pero con lista vacía
     json_response([
         "status" => "success",
         "data" => $operadores
@@ -90,6 +101,7 @@ if ($res) {
 
 $conexion->close();
 ?>
+
 
 
 
