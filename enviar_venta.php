@@ -3,7 +3,7 @@ header("Content-Type: application/json; charset=UTF-8");
 error_reporting(0);
 
 // 1. Configurar Zona Horaria (Ajusta según tu país, ej: 'America/Caracas')
-date_default_timezone_set('America/Caracas'); 
+date_default_timezone_set('America/Tegucigalpa');
 
 // 2. Conexión a TiDB Cloud (SSL Requerido)
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
@@ -85,3 +85,4 @@ echo json_encode([
 $stmt->close();
 $conexion->close();
 ?>
+
