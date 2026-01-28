@@ -1,14 +1,13 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// 1. Obtener datos del JSON
 $json_input = file_get_contents("php://input");
 $datos = json_decode($json_input, true);
 
 $usuario = isset($datos['usuario']) ? trim($datos['usuario']) : '';
 $password = isset($datos['password']) ? $datos['password'] : '';
 
-// 2. Conexión a TiDB
+// --- Configuración de conexión ---
 $host = getenv('DB_HOST');
 $user = getenv('DB_USER');
 $pass = getenv('DB_PASS');
@@ -31,9 +30,15 @@ if (empty($usuario) || empty($password)) {
     exit();
 }
 
-// 3. Función de validación (Asegúrate de que los nombres de columnas sean correctos)
-function buscar_y_validar($conn, $tabla, $col_id, $col_user, $col_pass, $usuario, $password, $rol) {
-    $sql = "SELECT $col_id, $col_user, $col_pass FROM $tabla WHERE $col_user = ?";
+/**
+ * Función de validación actualizada
+ * Se agregó el parámetro $col_status para verificar si el usuario está activo
+ */
+function buscar_y_validar($conn, $tabla, $col_id, $col_user, $col_pass, $usuario, $password, $rol, $col_status = null) {
+    // Si hay columna de estado, la incluimos en el SELECT
+    $select_status = $col_status ? ", $col_status" : "";
+    $sql = "SELECT $col_id, $col_user, $col_pass $select_status FROM $tabla WHERE $col_user = ?";
+    
     $stmt = mysqli_prepare($conn, $sql);
     if (!$stmt) return null;
 
@@ -42,8 +47,15 @@ function buscar_y_validar($conn, $tabla, $col_id, $col_user, $col_pass, $usuario
     $result = mysqli_stmt_get_result($stmt);
 
     if ($row = mysqli_fetch_assoc($result)) {
-        // Verifica con hash o texto plano
+        // 1. Validar Contraseña (Hash o Texto Plano)
         if (password_verify($password, $row[$col_pass]) || $password === $row[$col_pass]) {
+            
+            // 2. Validar Estado (Si se proporcionó la columna)
+            if ($col_status !== null && (int)$row[$col_status] === 0) {
+                mysqli_stmt_close($stmt);
+                return "disabled"; // Retornamos un flag específico
+            }
+
             mysqli_stmt_close($stmt);
             return [
                 'user_id'  => $row[$col_id],
@@ -56,37 +68,37 @@ function buscar_y_validar($conn, $tabla, $col_id, $col_user, $col_pass, $usuario
     return null;
 }
 
-// --- 4. LA PARTE QUE FALTABA: EJECUTAR LA BÚSQUEDA ---
-// --- 4. EJECUTAR LA BÚSQUEDA ---
+// --- EJECUTAR BÚSQUEDA ---
 $usuario_data = null;
 
-// LLAMADA EMPRESARIO
-// El orden debe ser: conn, tabla, col_id, col_user, col_pass, usuario, pass, rol
-$usuario_data = buscar_y_validar($conexion, 
-    'empresario', 
-    'idempresario', // $col_id
-    'empUsuario',   // $col_user
-    'empPassword',  // $col_pass
-    $usuario, 
-    $password, 
-    0
-);
+// 1. Intentar como EMPRESARIO (Asumimos que siempre están activos o no tienen esa columna)
+$usuario_data = buscar_y_validar($conexion, 'empresario', 'idempresario', 'empUsuario', 'empPassword', $usuario, $password, 0);
 
-// Si no es empresario, intentar como USUARIO/OPERADOR
-if ($usuario_data == null) {
-    $usuario_data = buscar_y_validar($conexion, 
+// 2. Si no es empresario, intentar como USUARIO/OPERADOR (Aquí validamos usdEstado)
+if ($usuario_data === null) {
+    $usuario_data = buscar_y_validar(
+        $conexion, 
         'usuario', 
-        'idUsuario',   // $col_id
-        'usdUsuario',  // $col_user
-        'usdPassword', // $col_pass
+        'idUsuario', 
+        'usdUsuario', 
+        'usdPassword', 
         $usuario, 
         $password, 
-        1
+        1, 
+        'usdEstado' // <--- Pasamos el nombre de la columna de estado
     );
 }
 
-// 5. Respuesta Final
-if ($usuario_data !== null) {
+// --- RESPUESTA FINAL ---
+
+if ($usuario_data === "disabled") {
+    // Caso: Usuario encontrado pero con usdEstado = 0
+    echo json_encode([
+        "status" => "error",
+        "message" => "El usuario está deshabilitado. Contacte al administrador."
+    ]);
+} elseif ($usuario_data !== null) {
+    // Caso: Login exitoso
     echo json_encode([
         "status" => "success", 
         "message" => "Login exitoso.",
@@ -95,6 +107,7 @@ if ($usuario_data !== null) {
         "rol" => (string)$usuario_data['rol']
     ]);
 } else {
+    // Caso: No existe o contraseña mal escrita
     echo json_encode([
         "status" => "error", 
         "message" => "Credenciales inválidas."
@@ -103,4 +116,3 @@ if ($usuario_data !== null) {
 
 mysqli_close($conexion);
 ?>
-
