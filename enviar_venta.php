@@ -59,7 +59,7 @@ if ($resTurnos) {
 }
 
 if ($idTurnoIdentificado == 0) {
-    die(json_encode(["status" => "error", "message" => "No existe un turno activo para la hora: $horaActual"]));
+    die(json_encode(["status" => "error", "message" => "No existe un turno activo para la hora $horaActual"]));
 }
 
 // 6. Inserción de Ventas (Usando Prepared Statement)
@@ -96,6 +96,7 @@ echo json_encode([
 
 $conexion->close();
 ?>
+
 
 
 
