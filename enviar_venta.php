@@ -1,6 +1,5 @@
 <?php
 // enviar_venta.php
-error_reporting(0); // IMPORTANTE: Evita que errores de PHP ensucien el JSON
 header("Content-Type: application/json; charset=UTF-8");
 
 date_default_timezone_set('America/Tegucigalpa');
@@ -79,4 +78,5 @@ echo json_encode([
 
 $conexion->close();
 ?>
+
 
