@@ -18,7 +18,7 @@ mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
 $resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$resultado) {
-    echo json_encode(["status" => "error", "message" => "Fallo conexión BD: " . mysqli_connect_error()]);
+    echo json_encode(["status" => "error", "message" => "Fallo conexión BD " . mysqli_connect_error()]);
     exit;
 }
 
@@ -51,7 +51,7 @@ $respuestas = [];
 $stmt = $conexion->prepare("INSERT INTO ventas (idusuario, numVenta, monto, Idturno, fecha_venta) VALUES (?, ?, ?, ?, ?)");
 
 if (!$stmt) {
-    echo json_encode(["status" => "error", "message" => "Error Prepare: " . $conexion->error]);
+    echo json_encode(["status" => "error", "message" => "Error Prepare " . $conexion->error]);
     exit;
 }
 
@@ -75,4 +75,5 @@ echo json_encode(["status" => "success", "message" => "Venta registrada", "data"
 $stmt->close();
 $conexion->close();
 ?>
+
 
