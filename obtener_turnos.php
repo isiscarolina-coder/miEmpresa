@@ -4,7 +4,7 @@
  * Retorna la lista de turnos para llenar el dropdown en Android
  */
 header("Content-Type: application/json; charset=UTF-8");
-error_reporting(0);// Configuración de conexión (TiDB Cloud)
+//error_reporting(0); Configuración de conexión (TiDB Cloud)
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
