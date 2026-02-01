@@ -25,7 +25,7 @@ if (!$resultado) {
 mysqli_set_charset($conexion, "utf8");
 
 // Consulta simple para obtener todos los turnos
-$sql = "SELECT idturnos, turnos, desde, hasta FROM turnos ORDER BY idturno ASC";
+$sql = "SELECT idturnos, turnos, desde, hasta FROM turnos ORDER BY idturnos ASC";
 $res = $conexion->query($sql);
 
 if ($res) {
