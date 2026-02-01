@@ -34,7 +34,7 @@ if ($idAdmin === 0) {
 }
 
 // Consulta: Obtenemos solo los operadores creados por este administrador
-$sql = "SELECT idusuario, usdUsuario FROM usuario WHERE operador = 1 AND idEmpresario = $idAdmin ORDER BY usdUsuario ASC";
+$sql = "SELECT idusuario, usdUsuario FROM usuario WHERE operador = 1 AND idempresario = $idAdmin ORDER BY usdUsuario ASC";
 $resultado = $conexion->query($sql);
 
 if ($resultado) {
