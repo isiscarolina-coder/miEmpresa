@@ -32,7 +32,7 @@ if ($idOperador !== "ALL") {
 
 $sql = "SELECT v.idventas, v.numVenta, v.monto, v.Idturno, t.turnos 
         FROM ventas v 
-        INNER JOIN turnos t ON v.Idturno = t.idturno 
+        INNER JOIN turnos t ON v.Idturno = t.idturnos 
         $where ORDER BY v.fecha_venta DESC";
 
 $resultado = $conexion->query($sql);
