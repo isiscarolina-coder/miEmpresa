@@ -27,7 +27,7 @@ if ($idOperador === 0 || $idTurno === 0 || empty($fecha)) {
 // Consulta directa y segura
 $sql = "SELECT v.idventas, v.numVenta, v.monto, v.Idturno, t.turnos 
         FROM ventas v 
-        INNER JOIN turnos t ON v.Idturno = t.idturno 
+        INNER JOIN turnos t ON v.Idturno = t.idturnos 
         WHERE v.idusuario = $idOperador 
         AND v.Idturno = $idTurno 
         AND DATE(v.fecha_venta) = '$fecha' 
