@@ -1,8 +1,11 @@
 <?php
-error_reporting(E_ALL); 
-ini_set('display_errors', 0); 
+// Impedir que errores crudos de PHP ensucien la salida JSON
+error_reporting(0);
+ini_set('display_errors', 0);
+
 header("Content-Type: application/json; charset=UTF-8");
 
+// 1. FORZAR HORA DE HONDURAS (Independiente de donde esté el teléfono)
 date_default_timezone_set('America/Tegucigalpa');
 
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
@@ -14,88 +17,93 @@ $port = 4000;
 $conexion = mysqli_init();
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt";
 mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
+
 $resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$resultado) {
-    die(json_encode(["status" => "error", "message" => "Error de Conexión: " . mysqli_connect_error()]));
+    echo json_encode(["status" => "error", "message" => "Fallo conexión BD: " . mysqli_connect_error()]);
+    exit;
 }
 
+mysqli_set_charset($conexion, "utf8");
+
+// 2. Leer JSON de Android
 $json = file_get_contents('php://input');
 $datos = json_decode($json, true);
 
-if (!$datos) {
-    die(json_encode(["status" => "error", "message" => "JSON Recibido Vacío"]));
+if (!$datos || !isset($datos['ventas'])) {
+    echo json_encode(["status" => "error", "message" => "JSON vacío o inválido"]);
+    exit;
 }
 
 $idUsuario = (int)$datos['idusuario'];
-$fechaVenta = $datos['fecha_venta'];
+$fechaVentaString = $datos['fecha_venta']; 
 
-// --- LOGICA DE TURNO ---
-// Capturamos solo la hora actual en formato 24h (ej: 14:30:00)
-$hora_actual = date('H:i:s'); 
+// Capturamos la hora actual de HONDURAS
+$hora_honduras = date('H:i:s'); 
 $idTurno = 0;
 
-// Consultamos los turnos
-$sqlTurnos = "SELECT idturno, desde, hasta FROM turnos";
-$resTurnos = $conexion->query($sqlTurnos);
+// 3. Lógica de Turno (Consultando la tabla turnos)
+$resTurnos = $conexion->query("SELECT idturnos, desde, hasta FROM turnos");
+if ($resTurnos) {
+    while($t = $resTurnos->fetch_assoc()) {
+        $desde = $t['desde'];
+        $hasta = $t['hasta'];
 
-while($t = $resTurnos->fetch_assoc()) {
-    $desde = $t['desde'];
-    $hasta = $t['hasta'];
-
-    // Caso Normal: Turno en el mismo día (ej: 08:00 a 16:00)
-    if ($desde <= $hasta) {
-        if ($hora_actual >= $desde && $hora_actual <= $hasta) {
-            $idTurno = $t['idturno'];
-            break;
-        }
-    } 
-    // Caso Especial: Turno que cruza la medianoche (ej: 22:00 a 06:00)
-    else {
-        if ($hora_actual >= $desde || $hora_actual <= $hasta) {
-            $idTurno = $t['idturno'];
-            break;
+        if ($desde <= $hasta) {
+            if ($hora_honduras >= $desde && $hora_honduras <= $hasta) {
+                $idTurno = $t['idturnos'];
+                break;
+            }
+        } else { // Caso turno medianoche
+            if ($hora_honduras >= $desde || $hora_honduras <= $hasta) {
+                $idTurno = $t['idturnos'];
+                break;
+            }
         }
     }
 }
 
 if ($idTurno == 0) {
-    die(json_encode(["status" => "error", "message" => "No existe un turno activo para la hora: $hora_actual"]));
+    echo json_encode(["status" => "error", "message" => "No hay turno activo en Honduras para las: $hora_honduras"]);
+    exit;
 }
 
+// 4. Inserción
 $respuestas = [];
-// Asegúrate que en la tabla 'ventas', la columna sea 'Idturno' o 'idturno' (sensible a mayúsculas)
-$stmt = $conexion->prepare("INSERT INTO ventas (idusuario, numVenta, monto, Idturno, fecha_venta) VALUES (?, ?, ?, ?, ?)");
+// IMPORTANTE: Verifica que la columna sea 'Idturno' (mayúscula) como pusiste en tu SQL
+$stmt = $conexion->prepare("INSERT INTO ventas (idusuario, numVenta, monto, idturno, fecha_venta) VALUES (?, ?, ?, ?, ?)");
 
 if (!$stmt) {
-    die(json_encode(["status" => "error", "message" => "Error en Prepare: " . $conexion->error]));
+    echo json_encode(["status" => "error", "message" => "Error SQL: " . $conexion->error]);
+    exit;
 }
 
 foreach ($datos['ventas'] as $v) {
     $num = $v['numero'];
     $mon = (int)$v['monto'];
-    // "isiis" -> idUsuario(i), num(s), mon(i), idTurno(i), fechaVenta(s)
-    $stmt->bind_param("isiis", $idUsuario, $num, $mon, $idTurno, $fechaVenta);
-    $stmt->execute();
     
-    $respuestas[] = [
-        "codigo" => (string)$conexion->insert_id,
-        "numero" => $num,
-        "valor" => $mon,
-        "turno_asignado" => $idTurno // Agregado para tu control
-    ];
+    $stmt->bind_param("isiis", $idUsuario, $num, $mon, $idTurno, $fechaVentaString);
+    
+    if ($stmt->execute()) {
+        $respuestas[] = [
+            "codigo" => (string)$conexion->insert_id,
+            "numero" => $num,
+            "valor" => $mon
+        ];
+    }
 }
 
 echo json_encode([
     "status" => "success", 
-    "message" => "Ventas registradas con éxito", 
-    "hora_procesada" => $hora_actual,
+    "message" => "Venta exitosa (Turno $idTurno)", 
     "data" => $respuestas
 ]);
 
 $stmt->close();
 $conexion->close();
 ?>
+
 
 
 
