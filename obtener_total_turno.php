@@ -23,7 +23,7 @@ $fecha_hoy = date('Y-m-d');
 
 // 1. Identificar el Turno
 $idTurno = 0;
-$sqlT = "SELECT idturno, desde, hasta FROM turnos";
+$sqlT = "SELECT idturnos, desde, hasta FROM turnos";
 $resT = $conexion->query($sqlT);
 
 while($t = $resT->fetch_assoc()) {
@@ -43,7 +43,7 @@ if ($idTurno == 0) {
 }
 
 // 3. Sumar el monto de las ventas de hoy para ese turno
-$sqlV = "SELECT SUM(monto) as total FROM ventas WHERE Idturno = $idTurno AND DATE(fecha_venta) = '$fecha_hoy'";
+$sqlV = "SELECT SUM(monto) as total FROM ventas WHERE idturno = $idTurno AND DATE(fecha_venta) = '$fecha_hoy'";
 $resV = $conexion->query($sqlV);
 $rowV = $resV->fetch_assoc();
 
