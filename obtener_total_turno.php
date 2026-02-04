@@ -18,6 +18,14 @@ if (!$res) {
     die(json_encode(["total" => 0])); // Si falla la conexión, devolvemos 0
 }
 
+// CAPTURAR EL ID DEL OPERADOR
+$idOperador = isset($_GET['idusuario']) ? (int)$_GET['idusuario'] : 0;
+
+if ($idOperador === 0) {
+    echo json_encode(["total" => 0]);
+    exit;
+}
+
 $hora_actual = date('H:i:s');
 $fecha_hoy = date('Y-m-d');
 
@@ -43,7 +51,7 @@ if ($idTurno == 0) {
 }
 
 // 3. Sumar el monto de las ventas de hoy para ese turno
-$sqlV = "SELECT SUM(monto) as total FROM ventas WHERE idturno = $idTurno AND DATE(fecha_venta) = '$fecha_hoy'";
+$sqlV = "SELECT SUM(monto) as total FROM ventas WHERE idturno = $idTurno AND DATE(fecha_venta) = '$fecha_hoy' AND idusuario = $idOperador";
 $resV = $conexion->query($sqlV);
 $rowV = $resV->fetch_assoc();
 
