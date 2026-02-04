@@ -30,9 +30,9 @@ while($t = $resT->fetch_assoc()) {
     $desde = $t['desde'];
     $hasta = $t['hasta'];
     if ($desde <= $hasta) {
-        if ($hora_actual >= $desde && $hora_actual <= $hasta) { $idTurno = $t['idturno']; break; }
+        if ($hora_actual >= $desde && $hora_actual <= $hasta) { $idTurno = $t['idturnos']; break; }
     } else {
-        if ($hora_actual >= $desde || $hora_actual <= $hasta) { $idTurno = $t['idturno']; break; }
+        if ($hora_actual >= $desde || $hora_actual <= $hasta) { $idTurno = $t['idturnos']; break; }
     }
 }
 
