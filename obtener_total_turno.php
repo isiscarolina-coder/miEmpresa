@@ -2,7 +2,6 @@
 header("Content-Type: application/json; charset=UTF-8");
 date_default_timezone_set('America/Tegucigalpa');
 
-// Configuración de conexión (Usa tus mismas variables)
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
@@ -15,14 +14,14 @@ mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
 $res = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$res) {
-    die(json_encode(["total" => 0])); // Si falla la conexión, devolvemos 0
+    // Agregamos idturno 0 o null en caso de error
+    die(json_encode(["total" => 0, "idturno" => 0])); 
 }
 
-// CAPTURAR EL ID DEL OPERADOR
 $idOperador = isset($_GET['idusuario']) ? (int)$_GET['idusuario'] : 0;
 
 if ($idOperador === 0) {
-    echo json_encode(["total" => 0]);
+    echo json_encode(["total" => 0, "idturno" => 0]);
     exit;
 }
 
@@ -38,15 +37,21 @@ while($t = $resT->fetch_assoc()) {
     $desde = $t['desde'];
     $hasta = $t['hasta'];
     if ($desde <= $hasta) {
-        if ($hora_actual >= $desde && $hora_actual <= $hasta) { $idTurno = $t['idturnos']; break; }
+        if ($hora_actual >= $desde && $hora_actual <= $hasta) { 
+            $idTurno = (int)$t['idturnos']; 
+            break; 
+        }
     } else {
-        if ($hora_actual >= $desde || $hora_actual <= $hasta) { $idTurno = $t['idturnos']; break; }
+        if ($hora_actual >= $desde || $hora_actual <= $hasta) { 
+            $idTurno = (int)$t['idturnos']; 
+            break; 
+        }
     }
 }
 
-// 2. Si no hay turno o no hay ventas, devolver 0
+// 2. Si no hay turno identificado
 if ($idTurno == 0) {
-    echo json_encode(["total" => 0]);
+    echo json_encode(["total" => 0, "idturno" => 0]);
     exit;
 }
 
@@ -57,7 +62,11 @@ $rowV = $resV->fetch_assoc();
 
 $total = $rowV['total'] ? (float)$rowV['total'] : 0;
 
-echo json_encode(["total" => $total]);
+// RESPUESTA MODIFICADA
+echo json_encode([
+    "total" => $total,
+    "idturno" => $idTurno
+]);
 
 $conexion->close();
 ?>
