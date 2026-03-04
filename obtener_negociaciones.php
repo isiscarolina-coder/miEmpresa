@@ -28,12 +28,10 @@ $sql = "SELECT
             n.idusuario, 
             u.usdUsuario as nombreOperador, 
             n.comision, 
-            n.multiplicador, 
-            n.fecha 
+            n.multiplicador 
         FROM negociacion n
-        INNER JOIN usuarios u ON n.idusuario = u.idusuario
-        WHERE u.id_empresario = ? 
-        ORDER BY n.fecha DESC";
+        INNER JOIN usuario u ON n.idusuario = u.idusuario
+        WHERE u.idempresario = ?;
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $idEmpresario);
