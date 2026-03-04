@@ -27,9 +27,9 @@ if ($idUsuario <= 0) {
 }
 
 // Actualizar o Insertar
-$sql = "INSERT INTO negociaciones (idusuario, comision, multiplicador) 
+$sql = "INSERT INTO negociacion (idusuario, comision, multiplicador) 
         VALUES (?, ?, ?) 
-        ON DUPLICATE KEY UPDATE comision = VALUES(comision), multiplicador = VALUES(multiplicador), fecha = CURRENT_TIMESTAMP";
+        ON DUPLICATE KEY UPDATE comision = VALUES(comision), multiplicador = VALUES(multiplicador)";
 
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("iii", $idUsuario, $comision, $multiplicador);
