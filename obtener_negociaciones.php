@@ -31,7 +31,7 @@ $sql = "SELECT
             n.multiplicador 
         FROM negociacion n
         INNER JOIN usuario u ON n.idusuario = u.idusuario
-        WHERE u.idempresario = ?;
+        WHERE u.idempresario = ?";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $idEmpresario);
