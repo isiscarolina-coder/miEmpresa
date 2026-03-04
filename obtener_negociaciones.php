@@ -30,7 +30,7 @@ $sql = "SELECT
             n.comision, 
             n.multiplicador, 
             n.fecha 
-        FROM negociaciones n
+        FROM negociacion n
         INNER JOIN usuarios u ON n.idusuario = u.idusuario
         WHERE u.id_empresario = ? 
         ORDER BY n.fecha DESC";
