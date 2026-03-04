@@ -8,13 +8,15 @@ $pass = "Kt7JQCCjn0CTWYAx";
 $db   = "test";
 $port = 4000;
 
-$conn = new mysqli($host, $user, $pass, $db);
+// Agregado el puerto a la conexión para TiDB
+$conn = new mysqli($host, $user, $pass, $db, $port);
 
 if ($conn->connect_error) {
-    die(json_encode(["status" => "error", "message" => "Conexión fallida"]));
+    echo json_encode(["status" => "error", "message" => "Conexión fallida: " . $conn->connect_error]);
+    exit;
 }
 
-// Obtener el ID del empresario/admin desde la URL
+// Obtener el ID del empresario
 $idEmpresario = isset($_GET['idEmpresario']) ? intval($_GET['idEmpresario']) : 0;
 
 if ($idEmpresario <= 0) {
@@ -22,8 +24,7 @@ if ($idEmpresario <= 0) {
     exit;
 }
 
-// Consulta para obtener las negociaciones y el nombre del usuario (operador)
-// Ajusta los nombres de las tablas y campos según tu base de datos
+// Consulta SQL corregida (sin espacios raros)
 $sql = "SELECT 
             n.idusuario, 
             u.usdUsuario as nombreOperador, 
@@ -33,34 +34,29 @@ $sql = "SELECT
         INNER JOIN usuario u ON n.idusuario = u.idusuario
         WHERE u.idempresario = ?";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $idEmpresario);
-$stmt->execute();
-$result = $stmt->get_result();
+if ($stmt = $conn->prepare($sql)) {
+    $stmt->bind_param("i", $idEmpresario);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-$data = [];
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $row['idusuario'] = intval($row['idusuario']);
+        $row['comision'] = intval($row['comision']);
+        $row['multiplicador'] = intval($row['multiplicador']);
+        $data[] = $row;
+    }
 
-while ($row = $result->fetch_assoc()) {
-    // Aseguramos que los tipos de datos coincidan con lo que espera Kotlin (Int para comision/multiplicador)
-    $row['idusuario'] = intval($row['idusuario']);
-    $row['comision'] = intval($row['comision']);
-    $row['multiplicador'] = intval($row['multiplicador']);
-    $data[] = $row;
-}
-
-if (count($data) > 0) {
     echo json_encode([
         "status" => "success",
-        "data" => $data
+        "data" => $data,
+        "message" => empty($data) ? "No hay negociaciones configuradas" : ""
     ]);
+
+    $stmt->close();
 } else {
-    echo json_encode([
-        "status" => "success",
-        "message" => "No hay negociaciones configuradas",
-        "data" => []
-    ]);
+    echo json_encode(["status" => "error", "message" => "Error en la consulta: " . $conn->error]);
 }
 
-$stmt->close();
 $conn->close();
 ?>
