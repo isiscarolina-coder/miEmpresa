@@ -1,17 +1,23 @@
 <?php
 header('Content-Type: application/json');
 
-// Configuración de la base de datos
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
 $db   = "test";
 $port = 4000;
 
-// Agregado el puerto a la conexión para TiDB
-$conn = new mysqli($host, $user, $pass, $db, $port);
+// 1. Inicializar mysqli sin conectar todavía
+$conn = mysqli_init();
 
-if ($conn->connect_error) {
+// 2. Configurar SSL (TiDB requiere que este flag esté activo)
+// No necesitas certificados locales para el Tier Serverless, solo activar el modo SSL
+$conn->ssl_set(NULL, NULL, NULL, NULL, NULL);
+
+// 3. Realizar la conexión con el flag MYSQLI_CLIENT_SSL
+$success = $conn->real_connect($host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
+
+if (!$success) {
     echo json_encode(["status" => "error", "message" => "Conexión fallida: " . $conn->connect_error]);
     exit;
 }
