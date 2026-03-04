@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// Configuración de conexión (TiDB Cloud con SSL)
+// Configuración TiDB Cloud
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
@@ -17,18 +17,16 @@ if (!$resultado) {
     die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
 }
 
-// Tu App de Android envía los datos por POST (x-www-form-urlencoded)
-// idusuario, comision, multiplicador
+// CAPTURAR DATOS DESDE $_POST (Compatible con el código Kotlin de arriba)
 $idUsuario     = isset($_POST['idusuario']) ? intval($_POST['idusuario']) : 0;
 $comision      = isset($_POST['comision']) ? intval($_POST['comision']) : 0;
 $multiplicador = isset($_POST['multiplicador']) ? intval($_POST['multiplicador']) : 0;
 
 if ($idUsuario <= 0) {
-    die(json_encode(["status" => "error", "message" => "ID de usuario no válido"]));
+    die(json_encode(["status" => "error", "message" => "Datos incompletos"]));
 }
 
-// Usamos REPLACE INTO o INSERT ... ON DUPLICATE KEY UPDATE 
-// para que si ya existe una negociación para ese usuario, se actualice.
+// Actualizar o Insertar
 $sql = "INSERT INTO negociaciones (idusuario, comision, multiplicador) 
         VALUES (?, ?, ?) 
         ON DUPLICATE KEY UPDATE comision = VALUES(comision), multiplicador = VALUES(multiplicador), fecha = CURRENT_TIMESTAMP";
@@ -37,15 +35,9 @@ $stmt = $conexion->prepare($sql);
 $stmt->bind_param("iii", $idUsuario, $comision, $multiplicador);
 
 if ($stmt->execute()) {
-    echo json_encode([
-        "status" => "success", 
-        "message" => "Negociación guardada correctamente"
-    ]);
+    echo json_encode(["status" => "success", "message" => "Guardado correctamente"]);
 } else {
-    echo json_encode([
-        "status" => "error", 
-        "message" => "Error al ejecutar: " . $stmt->error
-    ]);
+    echo json_encode(["status" => "error", "message" => $conexion->error]);
 }
 
 $stmt->close();
