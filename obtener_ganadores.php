@@ -18,25 +18,28 @@ if (!$resultado) {
 }
 
 // --- 2. CAPTURAR PARÁMETROS (Opcionales) ---
-// Si no existen en $_GET, los manejamos como null o vacío
 $fechaFiltro = $_GET['fecha'] ?? null;
 $idTurnoFiltro = $_GET['idturno'] ?? null;
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
-$sql = "SELECT numeroGanadorcol, fecha, idturnos FROM numero WHERE 1=1";
+// Usamos DATE_FORMAT para cambiar el formato de la fecha de YYYY-MM-DD a DD/MM/YYYY
+$sql = "SELECT 
+            numeroGanadorcol, 
+            DATE_FORMAT(fecha, '%d/%m/%Y') AS fecha, 
+            idturnos 
+        FROM numero 
+        WHERE 1=1";
 
-// Si hay fecha, filtramos por ella
+// Filtro por fecha (Asumiendo que el usuario envía la fecha en formato YYYY-MM-DD para la búsqueda)
 if (!empty($fechaFiltro)) {
     $sql .= " AND fecha = '" . $conexion->real_escape_string($fechaFiltro) . "'";
 }
 
-// Si hay ID de turno, filtramos por él
 if (!empty($idTurnoFiltro)) {
     $sql .= " AND idturnos = " . intval($idTurnoFiltro);
 }
 
-// Ordenar por fecha y turno (descendente para ver lo más reciente)
-$sql .= " ORDER BY fecha DESC, idturnos DESC";
+$sql .= " ORDER BY r.fecha DESC, idturnos DESC"; // Nota: r.fecha se cambió a fecha si no usas alias de tabla
 
 $res = $conexion->query($sql);
 $datos = [];
@@ -48,7 +51,7 @@ if ($res) {
     
     echo json_encode([
         "status" => "success",
-        "count"  => count($datos), // Añadimos un contador para control
+        "count"  => count($datos),
         "data"   => $datos
     ]);
 } else {
