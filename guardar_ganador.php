@@ -23,7 +23,7 @@ if (!$resultado) {
 $numero  = $_POST['numero'] ?? null;
 $idturno = $_POST['idturno'] ?? null;
 // Si envías la fecha en la URL, la usamos; si no, usamos la de hoy.
-$fecha   = $_GET['fecha'] ?? date("Y-m-d"); 
+$fecha   = $_POST['fecha'] ?? date("Y-m-d"); 
 
 // Validación básica
 if (empty($numero) || empty($idturno)) {
