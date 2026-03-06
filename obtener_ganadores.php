@@ -39,7 +39,7 @@ if (!empty($idTurnoFiltro)) {
     $sql .= " AND idturnos = " . intval($idTurnoFiltro);
 }
 
-$sql .= " ORDER BY r.fecha DESC, idturnos DESC"; // Nota: r.fecha se cambió a fecha si no usas alias de tabla
+$sql .= " ORDER BY fecha DESC, idturnos DESC"; // Nota: r.fecha se cambió a fecha si no usas alias de tabla
 
 $res = $conexion->query($sql);
 $datos = [];
