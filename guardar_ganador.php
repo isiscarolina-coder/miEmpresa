@@ -17,7 +17,6 @@ if (!$resultado) {
 }
 $numero  = $_POST['numero'];
 $idturno = $_POST['idturno'];
-$idadmin = $_POST['id_admin'];
 $fecha   = date("Y-m-d");
 
 $sql = "INSERT INTO resultados (numero, idturno, fecha, id_admin) 
