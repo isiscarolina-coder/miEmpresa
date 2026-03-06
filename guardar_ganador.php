@@ -19,12 +19,11 @@ $numero  = $_POST['numero'];
 $idturno = $_POST['idturno'];
 $fecha   = date("Y-m-d");
 
-$sql = "INSERT INTO resultados (numero, idturno, fecha, id_admin) 
-        VALUES (?, ?, ?, ?) 
-        ON DUPLICATE KEY UPDATE numero = VALUES(numero)";
+$sql = "INSERT INTO numero (numeroGanadorcol, idturnos, fecha) 
+        VALUES (?, ?, ?)";
 
 $stmt = $conexion->prepare($sql);
-$stmt->bind_param("sisi", $numero, $idturno, $fecha, $idadmin);
+$stmt->bind_param("iis", $numero, $idturno, $fecha);
 
 if ($stmt->execute()) {
     echo json_encode(["status" => "success", "message" => "Número ganador registrado"]);
