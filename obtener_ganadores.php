@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// --- 1. CONFIGURACIÓN DE CONEXIÓN (TiDB Cloud con SSL) ---
+// --- 1. CONFIGURACIÓN DE CONEXIÓN ---
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
@@ -17,33 +17,28 @@ if (!$resultado) {
     die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
 }
 
-// --- 2. CAPTURAR PARÁMETROS DE FILTRO (GET) ---
-// La app envía estos parámetros desde la URL
-$fechaFiltro = isset($_GET['fecha']) ? $_GET['fecha'] : '';
-$idTurnoFiltro = isset($_GET['idturno']) ? $_GET['idturno'] : '';
+// --- 2. CAPTURAR PARÁMETROS (Opcionales) ---
+// Si no existen en $_GET, los manejamos como null o vacío
+$fechaFiltro = $_GET['fecha'] ?? null;
+$idTurnoFiltro = $_GET['idturno'] ?? null;
 
-// --- 3. CONSTRUCCIÓN DE LA CONSULTA DINÁMICA ---
-// Usamos INNER JOIN para traer el nombre del turno (Matutino, etc)
-$sql = "SELECT r.numeroGanadorcol, r.fecha, r.idturnos
-        FROM numero r
-        WHERE 1=1";
+// --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
+$sql = "SELECT numeroGanadorcol, fecha, idturnos FROM numero WHERE 1=1";
 
-// Si la fecha no está vacía, agregamos el filtro
+// Si hay fecha, filtramos por ella
 if (!empty($fechaFiltro)) {
-    // Aseguramos formato YYYY-MM-DD si es necesario
-    $sql .= " AND r.fecha = '" . $conexion->real_escape_string($fechaFiltro) . "'";
+    $sql .= " AND fecha = '" . $conexion->real_escape_string($fechaFiltro) . "'";
 }
 
-// Si el ID de turno no está vacío, agregamos el filtro
+// Si hay ID de turno, filtramos por él
 if (!empty($idTurnoFiltro)) {
-    $sql .= " AND r.idturnos = " . intval($idTurnoFiltro);
+    $sql .= " AND idturnos = " . intval($idTurnoFiltro);
 }
 
-// Ordenar por fecha más reciente primero
-$sql .= " ORDER BY r.fecha DESC, r.idturnos DESC";
+// Ordenar por fecha y turno (descendente para ver lo más reciente)
+$sql .= " ORDER BY fecha DESC, idturnos DESC";
 
 $res = $conexion->query($sql);
-
 $datos = [];
 
 if ($res) {
@@ -53,7 +48,8 @@ if ($res) {
     
     echo json_encode([
         "status" => "success",
-        "data" => $datos
+        "count"  => count($datos), // Añadimos un contador para control
+        "data"   => $datos
     ]);
 } else {
     echo json_encode([
