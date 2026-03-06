@@ -18,8 +18,8 @@ if (!$resultado) {
 }
 
 // --- 2. CAPTURAR PARÁMETROS (Opcionales) ---
-$fechaFiltro = $_GET['fecha'] ?? null;
-$idTurnoFiltro = $_GET['idturno'] ?? null;
+$fechaFiltro = $_POST['fecha'] ?? null;
+$idTurnoFiltro = $_POST['idturno'] ?? null;
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
 // Usamos DATE_FORMAT para cambiar el formato de la fecha de YYYY-MM-DD a DD/MM/YYYY
