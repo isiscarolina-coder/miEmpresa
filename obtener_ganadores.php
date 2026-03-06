@@ -24,9 +24,8 @@ $idTurnoFiltro = isset($_GET['idturno']) ? $_GET['idturno'] : '';
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA DINÁMICA ---
 // Usamos INNER JOIN para traer el nombre del turno (Matutino, etc)
-$sql = "SELECT r.numero, r.fecha, t.turnos as nombre_turno 
-        FROM resultados r 
-        INNER JOIN turnos t ON r.idturno = t.idturnos 
+$sql = "SELECT r.numeroGanadorcol, r.fecha, r.idturnos
+        FROM numero r
         WHERE 1=1";
 
 // Si la fecha no está vacía, agregamos el filtro
@@ -37,11 +36,11 @@ if (!empty($fechaFiltro)) {
 
 // Si el ID de turno no está vacío, agregamos el filtro
 if (!empty($idTurnoFiltro)) {
-    $sql .= " AND r.idturno = " . intval($idTurnoFiltro);
+    $sql .= " AND r.idturnos = " . intval($idTurnoFiltro);
 }
 
 // Ordenar por fecha más reciente primero
-$sql .= " ORDER BY r.fecha DESC, r.idturno DESC";
+$sql .= " ORDER BY r.fecha DESC, r.idturnos DESC";
 
 $res = $conexion->query($sql);
 
