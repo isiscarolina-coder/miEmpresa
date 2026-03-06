@@ -9,22 +9,25 @@ $db   = "test";
 $port = 4000;
 
 $conexion = mysqli_init();
-$ca_cert = "/etc/ssl/certs/ca-certificates.crt";
+// Asegúrate de que esta ruta sea correcta en tu servidor Koyeb
+$ca_cert = "/etc/ssl/certs/ca-certificates.crt"; 
 mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
+
 $resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$resultado) {
-    die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
+    die(json_encode(["status" => "error", "message" => "Fallo conexión BD: " . mysqli_connect_error()]));
 }
 
-// --- 2. CAPTURA DE DATOS ---
-$numero  = $_POST['numero'] ?? null;
-$idturno = $_POST['idturno'] ?? null;
-$fecha   = date("Y-m-d");
+// --- 2. CAPTURA DE DATOS (Cambiado a $_GET para que funcione con tu URL) ---
+$numero  = $_GET['numero'] ?? null;
+$idturno = $_GET['idturno'] ?? null;
+// Si envías la fecha en la URL, la usamos; si no, usamos la de hoy.
+$fecha   = $_GET['fecha'] ?? date("Y-m-d"); 
 
-// Validación básica de que los datos no estén vacíos
+// Validación básica
 if (empty($numero) || empty($idturno)) {
-    die(json_encode(["status" => "error", "message" => "Datos incompletos"]));
+    die(json_encode(["status" => "error", "message" => "Datos incompletos (numero o idturno vacíos)"]));
 }
 
 // --- 3. VERIFICAR SI YA EXISTE EL REGISTRO ---
@@ -35,23 +38,22 @@ $stmtCheck->execute();
 $resCheck = $stmtCheck->get_result();
 
 if ($resCheck->num_rows > 0) {
-    // Si entra aquí, es porque ya hay un registro para esa fecha y ese turno
-    echo json_encode(["status" => "error", "message" => "Ya existe un número registrado para este turno el día de hoy"]);
+    echo json_encode(["status" => "error", "message" => "Ya existe un número para este turno hoy"]);
     $stmtCheck->close();
     $conexion->close();
     exit;
 }
 $stmtCheck->close();
 
-// --- 4. INSERTAR SI NO EXISTE ---
+// --- 4. INSERTAR ---
 $sqlInsert = "INSERT INTO numero (numeroGanadorcol, idturnos, fecha) VALUES (?, ?, ?)";
 $stmtInsert = $conexion->prepare($sqlInsert);
 $stmtInsert->bind_param("iis", $numero, $idturno, $fecha);
 
 if ($stmtInsert->execute()) {
-    echo json_encode(["status" => "success", "message" => "Número ganador registrado con éxito"]);
+    echo json_encode(["status" => "success", "message" => "Registrado con éxito"]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Error al registrar: " . $conexion->error]);
+    echo json_encode(["status" => "error", "message" => "Error al insertar: " . $stmtInsert->error]);
 }
 
 $stmtInsert->close();
