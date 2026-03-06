@@ -23,7 +23,7 @@ $idTurnoFiltro = $_GET['idturno'] ?? null;
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
 // Usamos DATE_FORMAT para cambiar el formato de la fecha de YYYY-MM-DD a DD/MM/YYYY
-$sql = "SELECT 
+$sql = "SELECT idnumeroGanador,
             numeroGanadorcol, 
             DATE_FORMAT(fecha, '%d/%m/%Y') AS fecha, 
             idturnos 
