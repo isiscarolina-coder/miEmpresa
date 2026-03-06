@@ -31,7 +31,7 @@ if (empty($numero) || empty($idturno)) {
 }
 
 // --- 3. VERIFICAR SI YA EXISTE EL REGISTRO ---
-$sqlCheck = "SELECT id FROM numero WHERE fecha = ? AND idturnos = ? LIMIT 1";
+$sqlCheck = "SELECT idnumeroGanador FROM numero WHERE fecha = ? AND idturnos = ? LIMIT 1";
 $stmtCheck = $conexion->prepare($sqlCheck);
 $stmtCheck->bind_param("si", $fecha, $idturno);
 $stmtCheck->execute();
