@@ -41,7 +41,7 @@ if ($idOperador > 0) {
 $sql = "SELECT 
     v.fecha_venta,
     v.idturno,
-    t.turnos as nombre_turno,
+    t.idturnos as nombre_turno,
     v.idusuario,
     u.usdUsuario as nombre_operador,
     SUM(v.monto) as ventas_totales,
