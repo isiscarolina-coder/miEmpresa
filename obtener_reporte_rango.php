@@ -59,14 +59,14 @@ LEFT JOIN negociacion neg ON v.idusuario = neg.idusuario
 LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         $where
         GROUP BY 
-    v.fecha_venta,         -- Corregido: antes decía fechaVenta
+    v.fecha_venta,         
     v.idturno, 
     t.turnos, 
     v.idusuario, 
     u.usdUsuario, 
     r.numeroGanadorcol, 
     neg.comision,
-    neg.multiplicador      -- Agregado para evitar conflictos de cálculo
+    neg.multiplicador     
 ORDER BY 
     v.fecha_venta DESC, 
     v.idturno DESC";
@@ -89,7 +89,7 @@ if ($res) {
         $data[] = [
             "numero_ganador" => $row['numero_ganador'] ?? "N/A",
             "turno" => $row['nombre_turno'],
-            "fecha" => date("d/m/Y", strtotime($row['fechaVenta'])), // Formato solicitado
+            "fecha" => date("d/m/Y", strtotime($row['fecha_venta'])), // Formato solicitado
             "operador" => $row['nombre_operador'],
             "ventas_totales" => number_format($ventas, 2, '.', ''),
             "comision" => number_format($comision_monto, 2, '.', ''),
