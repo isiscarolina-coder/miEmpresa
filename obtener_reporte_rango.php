@@ -26,39 +26,50 @@ $idOperador = isset($_GET['idOperador']) ? intval($_GET['idOperador']) : 0;
 $idAdmin    = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
 // 1. Construir la cláusula WHERE básica
-$where = "WHERE v.fechaVenta BETWEEN '$fechaDesde' AND '$fechaHasta'";
+$where = "WHERE v.fecha_venta BETWEEN '$fechaDesde' AND '$fechaHasta'";
 
 // 2. Filtrar por operador si se proporciona, si no, mostrar todos del admin
 if ($idOperador > 0) {
     $where .= " AND v.idusuario = $idOperador";
 } else {
     // Si no hay operador, filtramos por los que pertenecen a este administrador
-    $where .= " AND u.id_empresario = $idAdmin";
+    $where .= " AND u.idempresario = $idAdmin";
 }
 
 // 3. Consulta Principal
 // Agrupamos por fecha, turno y usuario para obtener los totales por "bloque"
 $sql = "SELECT 
-            v.fechaVenta,
-            v.idturno,
-            t.turnos as nombre_turno,
-            v.idusuario,
-            u.usdUsuario as nombre_operador,
-            SUM(v.montoVenta) as ventas_totales,
-            -- Obtenemos el número ganador para ese día y turno
-            (SELECT r.numero FROM resultados r WHERE r.fecha = v.fechaVenta AND r.idturno = v.idturno LIMIT 1) as numero_ganador,
-            -- Obtenemos la comisión configurada para este operador
-            COALESCE(neg.comision, 0) as porcentaje_comision,
-            -- Calculamos el monto ganado sumando solo los tickets que acertaron el número ganador
-            SUM(CASE WHEN v.numVenta = (SELECT r.numero FROM resultados r WHERE r.fecha = v.fechaVenta AND r.idturno = v.idturno LIMIT 1) 
-                THEN (v.montoVenta * COALESCE(neg.multiplicador, 0)) ELSE 0 END) as monto_ganador
-        FROM ventas v
-        INNER JOIN usuarios u ON v.idusuario = u.idusuario
-        INNER JOIN turnos t ON v.idturno = t.idturnos
-        LEFT JOIN negociaciones neg ON v.idusuario = neg.idusuario
+    v.fecha_venta,
+    v.idturno,
+    t.turnos as nombre_turno,
+    v.idusuario,
+    u.usdUsuario as nombre_operador,
+    SUM(v.monto) as ventas_totales,
+    r.numeroGanadorcol as numero_ganador,
+    COALESCE(neg.comision, 0) as porcentaje_comision,
+    -- Calculamos el monto ganado
+    SUM(CASE 
+        WHEN v.numVenta = r.numeroGanadorcol THEN (v.monto * COALESCE(neg.multiplicador, 0)) 
+        ELSE 0 
+    END) as monto_ganador
+FROM ventas v
+INNER JOIN usuario u ON v.idusuario = u.idusuario
+INNER JOIN turnos t ON v.idturno = t.idturnos
+LEFT JOIN negociacion neg ON v.idusuario = neg.idusuario
+LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         $where
-        GROUP BY v.fechaVenta, v.idturno, v.idusuario
-        ORDER BY v.fechaVenta DESC, v.idturno DESC";
+        GROUP BY 
+    v.fecha_venta,         -- Corregido: antes decía fechaVenta
+    v.idturno, 
+    t.turnos, 
+    v.idusuario, 
+    u.usdUsuario, 
+    r.numeroGanadorcol, 
+    neg.comision,
+    neg.multiplicador      -- Agregado para evitar conflictos de cálculo
+ORDER BY 
+    v.fecha_venta DESC, 
+    v.idturno DESC";
 
 $res = $conexion->query($sql);
 $data = [];
