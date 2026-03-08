@@ -61,7 +61,7 @@ LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         GROUP BY 
     v.fecha_venta,         
     v.idturno, 
-    t.turnos, 
+    t.idturnos, 
     v.idusuario, 
     u.usdUsuario, 
     r.numeroGanadorcol, 
