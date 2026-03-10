@@ -22,6 +22,7 @@ if (!$resultado) {
 $idusuario = isset($_GET['idusuario']) ? intval($_GET['idusuario']) : 0;
 $numero    = isset($_GET['numero']) ? $_GET['numero'] : '';
 $monto_solicitado = isset($_GET['monto']) ? intval($_GET['monto']) : 0;
+$hora_honduras = date('H:i:s'); 
 
 // 1. Obtener el turno activo actual
 $resTurnos = $conexion->query("SELECT idturnos, desde, hasta FROM turnos");
@@ -84,6 +85,7 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
 
