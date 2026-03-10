@@ -1,6 +1,9 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
+// 1. FORZAR HORA DE HONDURAS (Independiente de donde esté el teléfono)
+date_default_timezone_set('America/Tegucigalpa');
+
 // Configuración de conexión (TiDB Cloud con SSL)
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
@@ -86,6 +89,7 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
 
