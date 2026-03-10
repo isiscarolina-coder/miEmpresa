@@ -70,7 +70,7 @@ if ($res_limite->num_rows > 0) {
     $sql_ventas = "SELECT SUM(monto) as total_vendido FROM ventas 
                    WHERE idusuario = $idusuario 
                    AND numVenta = '$numero' 
-                   AND idturno = $idturno 
+                   AND idturno = $idTurno 
                    AND fecha_venta = '$fecha_hoy'";
     $res_ventas = $conexion->query($sql_ventas);
     $row_ventas = $res_ventas->fetch_assoc();
@@ -89,6 +89,7 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
 
