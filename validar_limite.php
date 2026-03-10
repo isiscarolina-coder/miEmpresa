@@ -55,7 +55,7 @@ if ($idTurno == 0) {
 }
 
 // 2. Buscar si existe un límite para este usuario y número (o 'ALL')
-$sql_limite = "SELECT cantidad FROM limite 
+$sql_limite = "SELECT cantLimite FROM limite 
                WHERE idusuario = $idusuario 
                AND (numero = '$numero' OR numero = 'ALL') 
                ORDER BY (numero = '$numero') DESC LIMIT 1";
@@ -89,6 +89,7 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
 
