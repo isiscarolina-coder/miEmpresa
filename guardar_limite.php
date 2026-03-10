@@ -14,9 +14,9 @@ $resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NU
 if (!$resultado) die(json_encode(["status" => "error", "message" => "Fallo conexión"]));
 
 // Recibir por POST
-$idusuario = isset($_POST['idusuario']) ? intval($_POST['idusuario']) : 0;
-$numero    = isset($_POST['numero']) ? $_POST['numero'] : ''; // 'ALL' o el número (05)
-$cantidad  = isset($_POST['cantidad']) ? intval($_POST['cantidad']) : 0;
+$idusuario = isset($_GET['idusuario']) ? intval($_GET['idusuario']) : 0;
+$numero    = isset($_GET['numero']) ? $_GET['numero'] : ''; // 'ALL' o el número (05)
+$cantidad  = isset($_GET['cantidad']) ? intval($_GET['cantidad']) : 0;
 $fecha     = date("Y-m-d");
 
 if ($idusuario > 0 && $cantidad > 0) {
