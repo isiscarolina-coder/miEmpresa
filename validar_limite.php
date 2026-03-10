@@ -1,7 +1,25 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// ... (Incluir tu código de conexión SSL aquí) ...
+header("Content-Type: application/json; charset=UTF-8");
+
+// Configuración de conexión (TiDB Cloud con SSL)
+$host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
+$user = "4Asq3bxQtZ3iP3r.root";
+$pass = "Kt7JQCCjn0CTWYAx";
+$db   = "test";
+$port = 4000;
+
+$conexion = mysqli_init();
+// Ruta del certificado SSL (Asegúrate de que sea la correcta en tu servidor Koyeb/Hosting)
+$ca_cert = "/etc/ssl/certs/ca-certificates.crt"; 
+mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
+
+$resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
+
+if (!$resultado) {
+    die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
+}
 
 $idusuario = isset($_GET['idusuario']) ? intval($_GET['idusuario']) : 0;
 $numero    = isset($_GET['numero']) ? $_GET['numero'] : '';
@@ -52,3 +70,4 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
