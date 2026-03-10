@@ -29,7 +29,7 @@ $fecha     = date("Y-m-d");
 if ($idusuario > 0 && $cantidad > 0 && !empty($numero)) {
     
     // Usamos Sentencias Preparadas para evitar Inyección SQL
-    $stmt = $conexion->prepare("INSERT INTO limite (idusuario, numero, cantidad, fecha) VALUES (?, ?, ?, ?)");
+    $stmt = $conexion->prepare("INSERT INTO limite (idusuario, numero, cantLimited, fecha) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("isis", $idusuario, $numero, $cantidad, $fecha);
 
     if ($stmt->execute()) {
