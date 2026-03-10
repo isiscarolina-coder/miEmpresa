@@ -38,7 +38,7 @@ $sql = "SELECT
             l.idusuario, 
             u.usdUsuario, 
             l.numero, 
-            l.cantidad, 
+            l.cantLimited, 
             l.fecha 
         FROM limite l 
         INNER JOIN usuario u ON l.idusuario = u.idusuario 
