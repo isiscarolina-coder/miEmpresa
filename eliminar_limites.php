@@ -7,30 +7,51 @@ $pass = "Kt7JQCCjn0CTWYAx";
 $db   = "test";
 $port = 4000;
 
+// 1. Inicializar el objeto
 $conexion = mysqli_init();
+if (!$conexion) {
+    die(json_encode(["status" => "error", "message" => "Fallo al inicializar mysqli"]));
+}
+
+// 2. Configurar SSL
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt"; 
 mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
 
-$resultado = @mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
+// 3. Intentar la conexión (eliminamos el @ para poder ver errores si fallara)
+$resultado = mysqli_real_connect($conexion, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$resultado) {
-    die(json_encode(["status" => "error", "message" => "Fallo conexión: " . mysqli_connect_error()]));
+    die(json_encode([
+        "status" => "error", 
+        "message" => "Fallo conexión: " . mysqli_connect_error()
+    ]));
 }
 
+// 4. Lógica de eliminación
 $idAdmin = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
 if ($idAdmin > 0) {
-    // Eliminamos los límites de los usuarios que pertenecen a este empresario
+    // IMPORTANTE: TiDB y MySQL a veces requieren una sintaxis específica para DELETE con JOIN
+    // Usamos sentencias preparadas para evitar errores de inicialización y seguridad
     $sql = "DELETE l FROM limite l 
             INNER JOIN usuario u ON l.idusuario = u.idusuario 
-            WHERE u.idempresario = $idAdmin";
+            WHERE u.idempresario = ?";
             
-    if ($conexion->query($sql)) {
-        echo json_encode(["status" => "success", "message" => "Límites eliminados"]);
+    if ($stmt = $conexion->prepare($sql)) {
+        $stmt->bind_param("i", $idAdmin);
+        
+        if ($stmt->execute()) {
+            echo json_encode(["status" => "success", "message" => "Límites eliminados"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => $stmt->error]);
+        }
+        $stmt->close();
     } else {
-        echo json_encode(["status" => "error", "message" => $conexion->error]);
+        echo json_encode(["status" => "error", "message" => "Error en la consulta: " . $conexion->error]);
     }
+} else {
+    echo json_encode(["status" => "error", "message" => "ID de Admin no proporcionado"]);
 }
+
 $conexion->close();
 ?>
-
