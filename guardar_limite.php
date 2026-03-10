@@ -18,9 +18,9 @@ if (!$resultado) {
 }
 
 // Captura de datos
-$idusuario = isset($_GET['idusuario']) ? (int)$_GET['idusuario'] : 0;
-$numero    = isset($_GET['numero']) ? $_GET['numero'] : '';
-$cantidad  = isset($_GET['cantidad']) ? (int)$_GET['cantidad'] : 0;
+$idusuario = isset($_POST['idusuario']) ? (int)$_POST['idusuario'] : 0;
+$numero    = isset($_POST['numero']) ? $_POST['numero'] : '';
+$cantidad  = isset($_POST['cantidad']) ? (int)$_POST['cantidad'] : 0;
 $fecha     = date("Y-m-d");
 
 if ($idusuario > 0 && $cantidad > 0 && !empty($numero)) {
