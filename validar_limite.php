@@ -63,7 +63,7 @@ $res_limite = $conexion->query($sql_limite);
 
 if ($res_limite->num_rows > 0) {
     $row_limite = $res_limite->fetch_assoc();
-    $cantLimite = $row_limite['cantidad'];
+    $cantLimite = $row_limite['cantLimited'];
 
     // 3. Sumar lo que ya se ha vendido de ese número en este turno y día
     $fecha_hoy = date("Y-m-d");
@@ -89,6 +89,7 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
 
