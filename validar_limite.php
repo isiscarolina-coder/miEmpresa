@@ -24,13 +24,29 @@ $numero    = isset($_GET['numero']) ? $_GET['numero'] : '';
 $monto_solicitado = isset($_GET['monto']) ? intval($_GET['monto']) : 0;
 
 // 1. Obtener el turno activo actual
-$sql_turno = "SELECT idturnos FROM turnos WHERE activo = 1 LIMIT 1";
-$res_turno = $conexion->query($sql_turno);
-$row_turno = $res_turno->fetch_assoc();
-$idturno = $row_turno['idturnos'] ?? 0;
+$resTurnos = $conexion->query("SELECT idturnos, desde, hasta FROM turnos");
+if ($resTurnos) {
+    while($t = $resTurnos->fetch_assoc()) {
+        $desde = $t['desde'];
+        $hasta = $t['hasta'];
 
-if ($idturno == 0) {
-    die(json_encode(["status" => "error", "message" => "No hay turno activo"]));
+        if ($desde <= $hasta) {
+            if ($hora_honduras >= $desde && $hora_honduras <= $hasta) {
+                $idTurno = $t['idturnos'];
+                break;
+            }
+        } else { // Caso turno medianoche
+            if ($hora_honduras >= $desde || $hora_honduras <= $hasta) {
+                $idTurno = $t['idturnos'];
+                break;
+            }
+        }
+    }
+}
+
+if ($idTurno == 0) {
+    echo json_encode(["status" => "error", "message" => "No hay turno activo en Honduras para las: $hora_honduras"]);
+    exit;
 }
 
 // 2. Buscar si existe un límite para este usuario y número (o 'ALL')
@@ -68,5 +84,6 @@ if ($res_limite->num_rows > 0) {
 
 $conexion->close();
 ?>
+
 
 
