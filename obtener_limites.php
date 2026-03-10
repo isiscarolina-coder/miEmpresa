@@ -20,7 +20,7 @@ if (!$resultado) {
 }
 
 // Recibir el ID del Administrador (Empresario)
-$idAdmin = isset($_POST['idAdmin']) ? intval($_POST['idAdmin']) : 0;
+$idAdmin = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
 if ($idAdmin <= 0) {
     echo json_encode(["status" => "error", "message" => "ID de administrador no válido"]);
