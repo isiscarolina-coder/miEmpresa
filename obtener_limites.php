@@ -55,7 +55,7 @@ if ($res) {
             "idusuario"  => intval($row['idusuario']),
             "usdUsuario" => $row['usdUsuario'], // Nombre del operador
             "numero"     => $row['numero'],     // Número limitado
-            "cantidad"   => intval($row['cantidad']), // Monto límite
+            "cantidad"   => intval($row['cantLimited']), // Monto límite
             "fecha"      => date("d M Y", strtotime($row['fecha'])) // Formato: 02 Mar 2026
         ];
     }
