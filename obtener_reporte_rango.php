@@ -66,10 +66,7 @@ LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
     u.usdUsuario, 
     r.numeroGanadorcol, 
     neg.comision,
-    neg.multiplicador     
-ORDER BY 
-    v.fecha_venta DESC, 
-    v.idturno DESC";
+    neg.multiplicador";
 
 $res = $conexion->query($sql);
 $data = [];
