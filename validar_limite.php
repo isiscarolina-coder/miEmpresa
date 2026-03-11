@@ -1,10 +1,10 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
 
-// 1. FORZAR HORA DE HONDURAS (Independiente de donde esté el teléfono)
+// 1. FORZAR HORA DE HONDURAS
 date_default_timezone_set('America/Tegucigalpa');
 
-// Configuración de conexión (TiDB Cloud con SSL)
+// Configuración de conexión
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
@@ -12,7 +12,6 @@ $db   = "test";
 $port = 4000;
 
 $conexion = mysqli_init();
-// Ruta del certificado SSL (Asegúrate de que sea la correcta en tu servidor Koyeb/Hosting)
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt"; 
 mysqli_ssl_set($conexion, NULL, NULL, $ca_cert, NULL, NULL);
 
@@ -62,12 +61,11 @@ $sql_limite = "SELECT cantLimited FROM limite
                ORDER BY (numero = '$numero') DESC LIMIT 1";
 $res_limite = $conexion->query($sql_limite);
 
-if ($res_limite->num_rows > 0) {
+if ($res_limite && $res_limite->num_rows > 0) {
     $row_limite = $res_limite->fetch_assoc();
     $cantLimite = $row_limite['cantLimited'];
 
-    // 3. Sumar lo que ya se ha vendido de ese número en este turno y día
-    $fecha_hoy = date("Y-m-d");
+    // 3. Sumar lo que ya se ha vendido
     $sql_ventas = "SELECT SUM(monto) as total_vendido FROM ventas 
                    WHERE idusuario = $idusuario 
                    AND numVenta = '$numero' 
@@ -81,9 +79,7 @@ if ($res_limite->num_rows > 0) {
     $cantDisponible = $cantLimite - $total_en_db;
 
     if (($total_en_db + $monto_solicitado) > $cantLimite) {
-        // Aseguramos que el disponible no muestre números negativos por si acaso
         $mostrarDisponible = max(0, $cantDisponible);
-        
         echo json_encode([
             "status" => "error", 
             "message" => "Valor sobregirado. Límite: $cantLimite. DISPONIBLE: $mostrarDisponible"
@@ -91,9 +87,14 @@ if ($res_limite->num_rows > 0) {
     } else {
         echo json_encode(["status" => "success", "message" => "Monto permitido"]);
     }
+} else {
+    // Si no hay límite establecido
+    echo json_encode(["status" => "success", "message" => "Sin restricciones"]);
+} // <--- ESTA LLAVE FALTABA (Cierre del if de límite)
 
 $conexion->close();
 ?>
+
 
 
 
