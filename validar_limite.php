@@ -78,18 +78,23 @@ if ($res_limite->num_rows > 0) {
     $total_en_db = intval($row_ventas['total_vendido'] ?? 0);
 
     // 4. Validación Final
+    $cantDisponible = $cantLimite - $total_en_db;
+
     if (($total_en_db + $monto_solicitado) > $cantLimite) {
-        echo json_encode(["status" => "error", "message" => "Valor sobregirado. Límite: $cantLimite"]);
+        // Aseguramos que el disponible no muestre números negativos por si acaso
+        $mostrarDisponible = max(0, $cantDisponible);
+        
+        echo json_encode([
+            "status" => "error", 
+            "message" => "Valor sobregirado. Límite: $cantLimite. DISPONIBLE: $mostrarDisponible"
+        ]);
     } else {
         echo json_encode(["status" => "success", "message" => "Monto permitido"]);
     }
-} else {
-    // Si no hay límite establecido, se permite cualquier monto
-    echo json_encode(["status" => "success", "message" => "Sin restricciones"]);
-}
 
 $conexion->close();
 ?>
+
 
 
 
