@@ -23,10 +23,10 @@ $fechaHasta  = isset($_GET['fechaHasta']) ? $_GET['fechaHasta'] : '';
 $idOperador  = isset($_GET['idOperador']) ? intval($_GET['idOperador']) : 0;
 $idAdmin     = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
-// Capturamos la orientación
+// Capturamos la orientación y validamos
 $orientacionInput = isset($_GET['orientacion']) ? strtoupper(trim($_GET['orientacion'])) : '';
 
-// 1. Construir la cláusula WHERE
+// 1. Cláusula WHERE
 $where = "WHERE v.fecha_venta BETWEEN '$fechaDesde' AND '$fechaHasta'";
 
 if ($idOperador > 0) {
@@ -35,14 +35,16 @@ if ($idOperador > 0) {
     $where .= " AND u.idempresario = $idAdmin";
 }
 
-// 2. Construir la cláusula ORDER BY solo si hay orientación
+// 2. Lógica de Ordenamiento: Solo si se recibe ASC o DESC
 $orderBy = "";
 if ($orientacionInput === 'ASC' || $orientacionInput === 'DESC') {
     $orderBy = " ORDER BY ventas_totales $orientacionInput";
 }
 
-// 3. Consulta Principal con Agrupación por Operador, Turno y Número
+// 3. Consulta Principal
+// Agrupamos por FECHA, TURNO, OPERADOR y NÚMERO GANADOR
 $sql = "SELECT 
+    v.fecha_venta,
     v.idturno,
     t.idturnos as nombre_turno,
     v.idusuario,
@@ -50,6 +52,7 @@ $sql = "SELECT
     r.numeroGanadorcol as numero_ganador,
     SUM(v.monto) as ventas_totales,
     COALESCE(neg.comision, 0) as porcentaje_comision,
+    -- Sumamos los premios basados en el multiplicador de la negociación
     SUM(CASE 
         WHEN v.numVenta = r.numeroGanadorcol THEN (v.monto * COALESCE(neg.multiplicador, 0)) 
         ELSE 0 
@@ -61,13 +64,15 @@ LEFT JOIN negociacion neg ON v.idusuario = neg.idusuario
 LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
 $where
 GROUP BY 
-    v.idusuario,
-    u.usdUsuario,
+    v.fecha_venta,
     v.idturno, 
     t.idturnos, 
+    v.idusuario,
+    u.usdUsuario,
     r.numeroGanadorcol,
-    neg.comision
-$orderBy"; // Aquí se inyecta el orden o queda vacío
+    neg.comision,
+    neg.multiplicador
+$orderBy";
 
 $res = $conexion->query($sql);
 $data = [];
@@ -82,6 +87,7 @@ if ($res) {
         $utilidad = $ventas - $comision_monto - $ganado;
 
         $data[] = [
+            "fecha" => date("d/m/Y", strtotime($row['fecha_venta'])),
             "operador" => $row['nombre_operador'],
             "turno" => $row['nombre_turno'],
             "numero_ganador" => $row['numero_ganador'] ?? "N/A",
@@ -94,7 +100,7 @@ if ($res) {
 
     echo json_encode([
         "status" => "success",
-        "orden" => $orientacionInput ? $orientacionInput : "ninguno",
+        "orden_aplicado" => $orientacionInput ?: "ninguno (natural)",
         "data" => $data,
         "totales_globales" => calcularTotales($data)
     ]);
@@ -120,5 +126,4 @@ function calcularTotales($items) {
 
 $conexion->close();
 ?>
-
 
