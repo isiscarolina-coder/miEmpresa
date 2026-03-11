@@ -4,7 +4,7 @@ header("Content-Type: application/json; charset=UTF-8");
 $host = "gateway01.us-east-1.prod.aws.tidbcloud.com";
 $user = "4Asq3bxQtZ3iP3r.root";
 $pass = "Kt7JQCCjn0CTWYAx";
-$db   = "test";
+$db    = "test";
 $port = 4000;
 
 $conexion = mysqli_init();
@@ -23,34 +23,42 @@ $numero    = isset($_POST['numero']) ? $_POST['numero'] : '';
 $cantidad  = isset($_POST['cantidad']) ? (int)$_POST['cantidad'] : 0;
 $fecha     = date("Y-m-d");
 
+// Validamos que el ID de usuario y la cantidad sean coherentes
 if ($idusuario > 0 && $cantidad > 0 && !empty($numero)) {
     
-    /**
-     * Usamos ON DUPLICATE KEY UPDATE:
-     * Si el par (idusuario, numero) ya existe, actualiza 'cantLimited' y 'fecha'.
-     * Si no existe, inserta el nuevo registro.
-     */
     $sql = "INSERT INTO limite (idusuario, numero, cantLimited, fecha) 
             VALUES (?, ?, ?, ?) 
             ON DUPLICATE KEY UPDATE cantLimited = VALUES(cantLimited), fecha = VALUES(fecha)";
 
     $stmt = $conexion->prepare($sql);
-    $stmt->bind_param("isis", $idusuario, $numero, $cantidad, $fecha);
 
-    if ($stmt->execute()) {
-        // affected_rows será 1 si fue insertado, o 2 si fue actualizado
-        $accion = ($conexion->affected_rows == 2) ? "actualizado" : "guardado";
-        echo json_encode(["status" => "success", "message" => "Límite $accion correctamente"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Error en DB: " . $stmt->error]);
+    // --- CASO ESPECIAL: Si el número es "-1" ---
+    if ($numero === "-1") {
+        for ($i = 0; $i <= 99; $i++) {
+            // Formateamos a dos dígitos: 00, 01, 02... 99
+            $num_formateado = str_pad($i, 2, "0", STR_PAD_LEFT);
+            $stmt->bind_param("isis", $idusuario, $num_formateado, $cantidad, $fecha);
+            $stmt->execute();
+        }
+        echo json_encode(["status" => "success", "message" => "Límite de $cantidad aplicado a los números del 00 al 99"]);
+    } 
+    // --- CASO NORMAL: Un solo número ---
+    else {
+        $stmt->bind_param("isis", $idusuario, $numero, $cantidad, $fecha);
+        if ($stmt->execute()) {
+            $accion = ($conexion->affected_rows == 2) ? "actualizado" : "guardado";
+            echo json_encode(["status" => "success", "message" => "Límite para el número $numero $accion correctamente"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error en DB: " . $stmt->error]);
+        }
     }
     
     $stmt->close();
 } else {
     echo json_encode([
         "status" => "error", 
-        "message" => "Datos incompletos",
-        "debug" => ["idusuario" => $idusuario, "cantidad" => $cantidad, "numero" => $numero]
+        "message" => "Datos incompletos o cantidad inválida",
+        "debug" => ["idusuario" => $idusuario, "numero" => $numero, "cantidad" => $cantidad]
     ]);
 }
 
