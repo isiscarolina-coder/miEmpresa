@@ -18,10 +18,10 @@ if (!$resultado) {
 }
 
 // --- 2. CAPTURAR PARÁMETROS DEL RANGO ---
-$fDesde = $_POST['fechaDesde'] ?? null;
-$tIni   = $_POST['idTurnoInicio'] ?? null;
-$fHasta = $_POST['fechaHasta'] ?? null;
-$tFin   = $_POST['idTurnoFin'] ?? null;
+$fDesde = $_GET['fechaDesde'] ?? null;
+$tIni   = $_GET['idTurnoInicio'] ?? null;
+$fHasta = $_GET['fechaHasta'] ?? null;
+$tFin   = $_GET['idTurnoFin'] ?? null;
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
 $sql = "SELECT idnumeroGanador,
