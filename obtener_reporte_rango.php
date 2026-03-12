@@ -59,7 +59,6 @@ LEFT JOIN negociacion neg ON v.idusuario = neg.idusuario
 LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         $where
         GROUP BY
-        v.idventas,
         v.fecha_venta,         
         v.idturno, 
         t.idturnos, 
@@ -68,7 +67,7 @@ LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         r.numeroGanadorcol, 
         neg.comision,
         neg.multiplicador
-    ORDER BY v.idventas, v.fecha_venta, v.idturno ASC";
+    ORDER BY v.fecha_venta, v.idturno ASC";
 
 $res = $conexion->query($sql);
 $data = [];
