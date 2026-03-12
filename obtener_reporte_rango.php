@@ -58,15 +58,17 @@ INNER JOIN turnos t ON v.idturno = t.idturnos
 LEFT JOIN negociacion neg ON v.idusuario = neg.idusuario
 LEFT JOIN numero r ON r.fecha = v.fecha_venta AND r.idturnos = v.idturno
         $where
-        GROUP BY 
-    v.fecha_venta,         
-    v.idturno, 
-    t.idturnos, 
-    v.idusuario, 
-    u.usdUsuario, 
-    r.numeroGanadorcol, 
-    neg.comision,
-    neg.multiplicador";
+        GROUP BY
+        v.idventas,
+        v.fecha_venta,         
+        v.idturno, 
+        t.idturnos, 
+        v.idusuario, 
+        u.usdUsuario, 
+        r.numeroGanadorcol, 
+        neg.comision,
+        neg.multiplicador
+    ORDER BY v.idventas, v.fecha_venta, v.idturno DESC";
 
 $res = $conexion->query($sql);
 $data = [];
