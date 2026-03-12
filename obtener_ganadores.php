@@ -17,30 +17,42 @@ if (!$resultado) {
     die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
 }
 
-// --- 2. CAPTURAR PARÁMETROS (Opcionales) ---
-$fechaFiltro = $_POST['fecha'] ?? null;
-$idTurnoFiltro = $_POST['idturno'] ?? null;
+// --- 2. CAPTURAR PARÁMETROS DEL RANGO ---
+$fDesde = $_POST['fechaDesde'] ?? null;
+$tIni   = $_POST['idTurnoInicio'] ?? null;
+$fHasta = $_POST['fechaHasta'] ?? null;
+$tFin   = $_POST['idTurnoFin'] ?? null;
 
 // --- 3. CONSTRUCCIÓN DE LA CONSULTA ---
-// Usamos DATE_FORMAT para cambiar el formato de la fecha de YYYY-MM-DD a DD/MM/YYYY
 $sql = "SELECT idnumeroGanador,
-            numeroGanadorcol, 
-            DATE_FORMAT(fecha, '%d/%m/%Y') AS fecha, 
-            idturnos 
+               numeroGanadorcol, 
+               DATE_FORMAT(fecha, '%d/%m/%Y') AS fecha_formateada, 
+               idturnos 
         FROM numero 
         WHERE 1=1";
 
-// Filtro por fecha (Asumiendo que el usuario envía la fecha en formato YYYY-MM-DD para la búsqueda)
-if (!empty($fechaFiltro)) {
-    $sql .= " AND fecha = '" . $conexion->real_escape_string($fechaFiltro) . "'";
+// Filtro por Rango de Fechas
+if (!empty($fDesde) && !empty($fHasta)) {
+    $fDesde_esc = $conexion->real_escape_string($fDesde);
+    $fHasta_esc = $conexion->real_escape_string($fHasta);
+    
+    // Filtramos el bloque principal de fechas
+    $sql .= " AND fecha BETWEEN '$fDesde_esc' AND '$fHasta_esc'";
 }
 
-if (!empty($idTurnoFiltro)) {
-    $sql .= " AND idturnos = " . intval($idTurnoFiltro);
+// Filtro por Rango de Turnos
+// Nota: Esto asume que dentro de las fechas seleccionadas, 
+// solo quieres los turnos comprendidos entre tIni y tFin.
+if (!empty($tIni)) {
+    $sql .= " AND idturnos >= " . intval($tIni);
+}
+if (!empty($tFin)) {
+    $sql .= " AND idturnos <= " . intval($tFin);
 }
 
-$sql .= " ORDER BY fecha DESC, idturnos DESC"; // Nota: r.fecha se cambió a fecha si no usas alias de tabla
+$sql .= " ORDER BY fecha ASC, idturnos ASC"; 
 
+// --- 4. EJECUCIÓN ---
 $res = $conexion->query($sql);
 $datos = [];
 
