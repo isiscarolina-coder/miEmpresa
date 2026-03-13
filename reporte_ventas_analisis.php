@@ -33,7 +33,6 @@ if ($idOperador !== "ALL") {
 // 2. Usamos SUM(v.monto) para obtener el total de la venta agrupada
 // 3. Usamos MAX() o MIN() para columnas que son iguales en el grupo (como turno)
 $sql = "SELECT 
-            MAX(v.idventas) as idventas, 
             v.numVenta, 
             SUM(v.monto) as monto_total, 
             v.Idturno, 
