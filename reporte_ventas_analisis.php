@@ -16,9 +16,9 @@ if (!$res) die(json_encode(["status" => "error", "message" => "Error conexión"]
 
 // Capturar filtros
 $idAdmin = $_GET['idEmpresario'];
-$idOperador = $_GET['idOperador']; // Puede ser "ALL" o un ID
+$idOperador = $_GET['idOperador']; 
 $idTurno = $_GET['idTurno'];
-$fecha = $_GET['fecha']; // Formato YYYY-MM-DD
+$fecha = $_GET['fecha']; 
 
 // Construir consulta dinámica
 $where = "WHERE v.Idturno = $idTurno AND DATE(v.fecha_venta) = '$fecha' ";
@@ -26,20 +26,31 @@ $where = "WHERE v.Idturno = $idTurno AND DATE(v.fecha_venta) = '$fecha' ";
 if ($idOperador !== "ALL") {
     $where .= " AND v.idusuario = $idOperador";
 } else {
-    // Si es ALL, filtramos por los usuarios que pertenecen a este administrador
     $where .= " AND v.idusuario IN (SELECT idusuario FROM usuario WHERE idEmpresario = $idAdmin)";
 }
 
-$sql = "SELECT v.idventas, v.numVenta, v.monto, v.Idturno, t.turnos 
+// 1. Agregamos GROUP BY v.numVenta
+// 2. Usamos SUM(v.monto) para obtener el total de la venta agrupada
+// 3. Usamos MAX() o MIN() para columnas que son iguales en el grupo (como turno)
+$sql = "SELECT 
+            MAX(v.idventas) as idventas, 
+            v.numVenta, 
+            SUM(v.monto) as monto_total, 
+            v.Idturno, 
+            t.turnos 
         FROM ventas v 
         INNER JOIN turnos t ON v.Idturno = t.idturnos 
-        $where ORDER BY v.idventas DESC";
+        $where 
+        GROUP BY v.numVenta, v.Idturno, t.turnos
+        ORDER BY idventas DESC";
 
 $resultado = $conexion->query($sql);
 $ventas = [];
 
-while($row = $resultado->fetch_assoc()) {
-    $ventas[] = $row;
+if ($resultado) {
+    while($row = $resultado->fetch_assoc()) {
+        $ventas[] = $row;
+    }
 }
 
 echo json_encode(["status" => "success", "data" => $ventas]);
