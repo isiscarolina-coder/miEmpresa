@@ -41,7 +41,7 @@ $sql = "SELECT
         INNER JOIN turnos t ON v.Idturno = t.idturnos 
         $where 
         GROUP BY v.numVenta, v.Idturno, t.turnos
-        ORDER BY idventas DESC";
+        ORDER BY v.numVenta DESC";
 
 $resultado = $conexion->query($sql);
 $ventas = [];
