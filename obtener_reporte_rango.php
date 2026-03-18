@@ -49,9 +49,10 @@ $sql = "SELECT
     COALESCE(neg.comision, 0) as porcentaje_comision,
     -- Calculamos el monto ganado
     SUM(CASE 
-        WHEN v.numVenta = r.numeroGanadorcol THEN (v.monto * COALESCE(neg.multiplicador, 0)) 
-        ELSE 0 
-    END) as monto_ganador
+    -- Forzamos a que ambos sean tratados como texto o número para evitar fallos de formato
+    WHEN CAST(v.numVenta AS UNSIGNED) = CAST(r.numeroGanadorcol AS UNSIGNED) 
+    THEN (v.monto * COALESCE(neg.multiplicador, 0)) 
+    ELSE 0 END) as monto_ganador
 FROM ventas v
 INNER JOIN usuario u ON v.idusuario = u.idusuario
 INNER JOIN turnos t ON v.idturno = t.idturnos
