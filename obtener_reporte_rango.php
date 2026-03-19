@@ -27,6 +27,7 @@ $idAdmin    = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
 // 1. Construir la cláusula WHERE básica
 $where = "WHERE v.fecha_venta BETWEEN '$fechaDesde' AND '$fechaHasta'";
+$where .= " AND v.idturno BETWEEN $idTurno1 AND $idTurno2";
 
 // 2. Filtrar por operador si se proporciona, si no, mostrar todos del admin
 if ($idOperador > 0) {
