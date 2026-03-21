@@ -26,17 +26,18 @@ $idOperador = isset($_GET['idOperador']) ? intval($_GET['idOperador']) : 0;
 $idAdmin    = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
 
 // 1. Construir la cláusula WHERE básica
-$where = "WHERE v.fecha_venta BETWEEN '$fechaDesde' AND '$fechaHasta'";
-$where .= " AND v.idturno BETWEEN $idTurno1 AND $idTurno2";
+// Comparamos (Fecha + Turno) como una sola unidad
+$desde = $fechaDesde . str_pad($idTurno1, 2, "0", STR_PAD_LEFT);
+$hasta = $fechaHasta . str_pad($idTurno2, 2, "0", STR_PAD_LEFT);
 
-// 2. Filtrar por operador si se proporciona, si no, mostrar todos del admin
+$where = "WHERE CONCAT(v.fecha_venta, LPAD(v.idturno, 2, '0')) BETWEEN '$desde' AND '$hasta'";
+
+// 2. Filtrar por operador o administrador
 if ($idOperador > 0) {
     $where .= " AND v.idusuario = $idOperador";
 } else {
-    // Si no hay operador, filtramos por los que pertenecen a este administrador
     $where .= " AND u.idempresario = $idAdmin";
 }
-
 // 3. Consulta Principal
 // Agrupamos por fecha, turno y usuario para obtener los totales por "bloque"
 $sql = "SELECT 
