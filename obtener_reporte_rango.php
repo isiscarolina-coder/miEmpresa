@@ -17,20 +17,39 @@ if (!$resultado) {
     die(json_encode(["status" => "error", "message" => "Fallo conexión BD"]));
 }
 
+// ... (tu código de conexión igual)
+
 // Recibir parámetros
-$fechaDesde = isset($_GET['fechaDesde']) ? $_GET['fechaDesde'] : ''; // Formato YYYY-MM-DD
-$fechaHasta = isset($_GET['fechaHasta']) ? $_GET['fechaHasta'] : '';
-$idTurno1   = isset($_GET['idTurno1']) ? intval($_GET['idTurno1']) : 0;
-$idTurno2   = isset($_GET['idTurno2']) ? intval($_GET['idTurno2']) : 0;
-$idOperador = isset($_GET['idOperador']) ? intval($_GET['idOperador']) : 0;
-$idAdmin    = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
+$fechaDesdeRaw = isset($_GET['fechaDesde']) ? $_GET['fechaDesde'] : '';
+$fechaHastaRaw = isset($_GET['fechaHasta']) ? $_GET['fechaHasta'] : '';
+$idTurno1      = isset($_GET['idTurno1']) ? intval($_GET['idTurno1']) : 0;
+$idTurno2      = isset($_GET['idTurno2']) ? intval($_GET['idTurno2']) : 0;
+$idOperador    = isset($_GET['idOperador']) ? intval($_GET['idOperador']) : 0;
+$idAdmin       = isset($_GET['idAdmin']) ? intval($_GET['idAdmin']) : 0;
+
+// --- CORRECCIÓN DE FORMATO DE FECHA ---
+function normalizarFecha($fecha) {
+    if (empty($fecha)) return date('Y-m-d'); // Fecha hoy si está vacío
+    try {
+        $d = new DateTime($fecha);
+        return $d->format('Y-m-d');
+    } catch (Exception $e) {
+        return date('Y-m-d'); 
+    }
+}
+
+$fechaDesde = normalizarFecha($fechaDesdeRaw);
+$fechaHasta = normalizarFecha($fechaHastaRaw);
+// --------------------------------------
 
 // 1. Construir la cláusula WHERE básica
-// Comparamos (Fecha + Turno) como una sola unidad
+// Ahora $fechaDesde siempre será 2026-03-15 aunque envíes 2026-3-15
 $desde = $fechaDesde . str_pad($idTurno1, 2, "0", STR_PAD_LEFT);
 $hasta = $fechaHasta . str_pad($idTurno2, 2, "0", STR_PAD_LEFT);
 
 $where = "WHERE CONCAT(v.fecha_venta, LPAD(v.idturno, 2, '0')) BETWEEN '$desde' AND '$hasta'";
+
+// ... (el resto de tu consulta SQL y lógica de respuesta)
 
 // 2. Filtrar por operador o administrador
 if ($idOperador > 0) {
