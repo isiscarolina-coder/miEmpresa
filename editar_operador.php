@@ -36,7 +36,7 @@ $nuevoPassword = isset($data['usdPassword']) ? $data['usdPassword'] : null;
 
 try {
     // 1. Verificar si el nombre de usuario ya existe en otro registro (evitar duplicados)
-    $stmtCheck = $conn->prepare("SELECT idusuario FROM usuarios WHERE usdUsuario = ? AND idusuario != ?");
+    $stmtCheck = $conn->prepare("SELECT idusuario FROM usuario WHERE usdUsuario = ? AND idusuario != ?");
     $stmtCheck->bind_param("si", $nuevoUsuario, $idusuario);
     $stmtCheck->execute();
     $resultCheck = $stmtCheck->get_result();
@@ -51,7 +51,7 @@ try {
         // Si hay password, lo encriptamos (RECOMENDADO)
         $hashedPassword = password_hash($nuevoPassword, PASSWORD_DEFAULT);
         
-        $stmt = $conn->prepare("UPDATE usuarios SET usdUsuario = ?, usdPassword = ? WHERE idusuario = ?");
+        $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ?, usdPassword = ? WHERE idusuario = ?");
         $stmt->bind_param("ssi", $nuevoUsuario, $hashedPassword, $idusuario);
     } else {
         // Si no hay password, solo actualizamos el nombre de usuario
