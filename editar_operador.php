@@ -52,7 +52,7 @@ try {
         $hashedPassword = password_hash($nuevoPassword, PASSWORD_DEFAULT);
         
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ?, usdPassword = ?, usdPassv = ? WHERE idusuario = ?");
-        $stmt->bind_param("ssi", $nuevoUsuario, $hashedPassword, $idusuario, $nuevoPassword);
+        $stmt->bind_param("ssis", $nuevoUsuario, $hashedPassword, $idusuario, $nuevoPassword);
     } else {
         // Si no hay password, solo actualizamos el nombre de usuario
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ? WHERE idusuario = ?");
