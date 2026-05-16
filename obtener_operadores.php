@@ -49,7 +49,7 @@ if ($idAdmin <= 0) {
 }
 
 // --- Consulta usando Prepared Statements (Más seguro) ---
-$sql = "SELECT idusuario, usdUsuario, usdEstado FROM usuario WHERE operador = 1 AND idEmpresario = ?";
+$sql = "SELECT idusuario, usdUsuario, usdPassV, usdEstado FROM usuario WHERE operador = 1 AND idEmpresario = ?";
 $stmt = $conexion->prepare($sql);
 
 if ($stmt) {
@@ -62,6 +62,7 @@ if ($stmt) {
         $operadores[] = [
             "idusuario"  => (int)$row['idusuario'],
             "usdUsuario" => $row['usdUsuario'],
+            "usdPassv"  => (int)$row['usdPassV'],
             "usdEstado"  => (int)$row['usdEstado']
         ];
     }
