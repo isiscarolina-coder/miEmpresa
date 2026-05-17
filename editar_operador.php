@@ -8,7 +8,6 @@ $pass = "Kt7JQCCjn0CTWYAx";
 $db   = "test";
 $port = 4000;
 
-
 $conn = mysqli_init();
 $ca_cert = "/etc/ssl/certs/ca-certificates.crt";
 mysqli_ssl_set($conn, NULL, NULL, $ca_cert, NULL, NULL);
@@ -20,7 +19,7 @@ if ($conn->connect_error) {
     die(json_encode(["status" => "error", "message" => "Fallo de conexión"]));
 }
 
-// Leer el JSON enviado desde Android
+// Leer el JSON enviado desde Android/Browser
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
@@ -32,13 +31,12 @@ if (!isset($data['idusuario']) || !isset($data['usdUsuario'])) {
 
 $idusuario = $data['idusuario'];
 $nuevoUsuario = $data['usdUsuario'];
-$nuevoPassword = isset($data['usdPassword']) ? $data['usdPassword'] : null;
-$PasswordReal = isset($data['usdPassword']) ? $data['usdPassword'] : null;
+$nuevoPassword = isset($data['usdPassword']) && !empty($data['usdPassword']) ? $data['usdPassword'] : null;
 
 try {
-    // 1. Verificar si el nombre de usuario ya existe en otro registro (evitar duplicados)
+    // 1. Verificar si el nombre de usuario ya existe en otro registro
     $stmtCheck = $conn->prepare("SELECT idusuario FROM usuario WHERE usdUsuario = ? AND idusuario != ?");
-    $stmtCheck->bind_param("si", $nuevoUsuario, $idusuario);
+    $stmtCheck->bind_param("si", $nuevoUsuario, $idusuario); // 's' para usuario, 'i' para idusuario
     $stmtCheck->execute();
     $resultCheck = $stmtCheck->get_result();
 
@@ -47,13 +45,17 @@ try {
         exit;
     }
 
-    // 2. Preparar la consulta de actualización según si hay password nuevo o no
-    if ($nuevoPassword !== null && !empty($nuevoPassword)) {
-        // Si hay password, lo encriptamos (RECOMENDADO)
+    // 2. Preparar la consulta de actualización
+    if ($nuevoPassword !== null) {
+        // Encriptamos la contraseña para usdPassword
         $hashedPassword = password_hash($nuevoPassword, PASSWORD_DEFAULT);
         
+        // El orden en el SQL es: usdUsuario(1), usdPassword(2), usdPassV(3), idusuario(4)
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ?, usdPassword = ?, usdPassV = ? WHERE idusuario = ?");
-        $stmt->bind_param("ssis", $nuevoUsuario, $hashedPassword, $idusuario, $PasswordReal);
+        
+        // CORRECCIÓN: Definimos tipos 'ssss' o 'sssi' dependiendo de tu DB. Asumiré 'sssi' (idusuario como entero)
+        // Estructura: nuevoUsuario (s), hashedPassword (s), nuevoPassword visible (s), idusuario (i)
+        $stmt->bind_param("sssi", $nuevoUsuario, $hashedPassword, $nuevoPassword, $idusuario);
     } else {
         // Si no hay password, solo actualizamos el nombre de usuario
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ? WHERE idusuario = ?");
@@ -61,10 +63,12 @@ try {
     }
 
     if ($stmt->execute()) {
-        if ($stmt->affected_rows >= 0) { // >= 0 por si el usuario guarda sin cambiar nada
+        // Modificado para ser más precisos con las filas afectadas
+        if ($stmt->affected_rows > 0) {
             echo json_encode(["status" => "success", "message" => "Usuario actualizado correctamente"]);
         } else {
-            echo json_encode(["status" => "error", "message" => "No se realizaron cambios"]);
+            // affected_rows puede ser 0 si mandaste los mismos datos que ya estaban guardados
+            echo json_encode(["status" => "success", "message" => "No se realizaron cambios (los datos ya eran idénticos)"]);
         }
     } else {
         echo json_encode(["status" => "error", "message" => "Error al ejecutar la actualización"]);
