@@ -33,6 +33,7 @@ if (!isset($data['idusuario']) || !isset($data['usdUsuario'])) {
 $idusuario = $data['idusuario'];
 $nuevoUsuario = $data['usdUsuario'];
 $nuevoPassword = isset($data['usdPassword']) ? $data['usdPassword'] : null;
+$PasswordReal = isset($data['usdPassword']) ? $data['usdPassword'] : null;
 
 try {
     // 1. Verificar si el nombre de usuario ya existe en otro registro (evitar duplicados)
@@ -52,7 +53,7 @@ try {
         $hashedPassword = password_hash($nuevoPassword, PASSWORD_DEFAULT);
         
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ?, usdPassword = ?, usdPassV = ? WHERE idusuario = ?");
-        $stmt->bind_param("ssis", $nuevoUsuario, $hashedPassword, $idusuario, $nuevoPassword);
+        $stmt->bind_param("ssis", $nuevoUsuario, $hashedPassword, $idusuario, $PasswordReal);
     } else {
         // Si no hay password, solo actualizamos el nombre de usuario
         $stmt = $conn->prepare("UPDATE usuario SET usdUsuario = ? WHERE idusuario = ?");
