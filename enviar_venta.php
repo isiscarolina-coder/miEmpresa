@@ -37,8 +37,9 @@ if (!$datos || !isset($datos['ventas'])) {
 }
 
 $idUsuario = (int)$datos['idusuario'];
-$fechaVentaString = $datos['fecha_venta']; 
+//$fechaVentaString = $datos['fecha_venta']; 
 
+$fechaVentaString = date('c');
 // Capturamos la hora actual de HONDURAS
 $hora_honduras = date('H:i:s'); 
 $idTurno = 0;
