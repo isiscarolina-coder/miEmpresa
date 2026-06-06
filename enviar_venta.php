@@ -92,6 +92,7 @@ foreach ($datos['ventas'] as $v) {
             "codigo" => (string)$conexion->insert_id,
             "numero" => $num,
             "valor" => $mon,
+            "fecha_honduras" => $fechaVentaString,
             "hora_honduras" => $hora_honduras
         ];
     }
