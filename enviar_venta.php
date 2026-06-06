@@ -72,7 +72,7 @@ if ($idTurno == 0) {
 // 4. Inserción
 $respuestas = [];
 // IMPORTANTE: Verifica que la columna sea 'Idturno' (mayúscula) como pusiste en tu SQL
-$stmt = $conexion->prepare("INSERT INTO ventas (idusuario, numVenta, monto, idturno, fecha_venta) VALUES (?, ?, ?, ?, ?)");
+$stmt = $conexion->prepare("INSERT INTO ventas (idusuario, numVenta, monto, idturno, fecha_venta, hora_registro) VALUES (?, ?, ?, ?, ?, ?)");
 
 if (!$stmt) {
     echo json_encode(["status" => "error", "message" => "Error SQL: " . $conexion->error]);
@@ -82,14 +82,16 @@ if (!$stmt) {
 foreach ($datos['ventas'] as $v) {
     $num = $v['numero'];
     $mon = (int)$v['monto'];
+    $hora_honduras = date('H:i:s'); 
     
-    $stmt->bind_param("isiis", $idUsuario, $num, $mon, $idTurno, $fechaVentaString);
+    $stmt->bind_param("isiiss", $idUsuario, $num, $mon, $idTurno, $fechaVentaString, $hora_honduras);
     
     if ($stmt->execute()) {
         $respuestas[] = [
             "codigo" => (string)$conexion->insert_id,
             "numero" => $num,
-            "valor" => $mon
+            "valor" => $mon,
+            "hora_honduras" => $hora_honduras
         ];
     }
 }
