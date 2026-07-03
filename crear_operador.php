@@ -36,6 +36,7 @@ if (!is_array($datos)) {
 // --- Mapear variables ---
 $usuario  = trim((string)($datos['usdUsuario']   ?? ''));
 $password = (string)($datos['usdPassword']       ?? '');
+$passV = (string)($datos['usdPassword']       ?? '');
 $idAdmin  = (int)($datos['idEmpresario']         ?? 0);
 
 // --- Validaciones básicas ---
@@ -133,8 +134,8 @@ $checkStmt->close();
 
 // --- Inserción ---
 $sql = "INSERT INTO usuario 
-        (usdUsuario, usdPassword, operador, usdEstado, idEmpresario)
-        VALUES (?, ?, 1, 1, ?)";
+        (usdUsuario, usdPassword, usdPassv, operador, usdEstado, idEmpresario)
+        VALUES (?, ?, ?, 1, 1, ?)";
 
 $stmt = $conexion->prepare($sql);
 if ($stmt === false) {
@@ -145,7 +146,7 @@ if ($stmt === false) {
     ], 500);
 }
 
-$stmt->bind_param("ssi", $usuario, $passHash, $idAdmin);
+$stmt->bind_param("sssi", $usuario, $passHash, $passV, $idAdmin);
 
 if (!$stmt->execute()) {
     $err = $stmt->error;
