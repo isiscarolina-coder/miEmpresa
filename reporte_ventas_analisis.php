@@ -23,12 +23,22 @@ $fecha = $_GET['fecha'];
 // Construir consulta dinámica
 $where = "WHERE v.Idturno = $idTurno AND DATE(v.fecha_venta) = '$fecha' ";
 
-if ($idOperador !== "ALL") {
-    $where .= " AND v.idusuario = $idOperador";
+// Manejo dinámico de idOperador (separado por comas)
+if ($idOperador !== "ALL" && !empty($idOperador)) {
+    // Convertir la cadena separada por comas en un array
+    $operadoresArray = explode(',', $idOperador);
+    
+    // Limpiar cada valor para asegurarnos de que sean números enteros (seguridad)
+    $operadoresLimpios = array_map('intval', $operadoresArray);
+    
+    // Volver a unirlos en una cadena separada por comas lista para el IN
+    $idsIn = implode(',', $operadoresLimpios);
+    
+    // Agregar la condición usando IN en lugar de un igual simple
+    $where .= " AND v.idusuario IN ($idsIn)";
 } else {
     $where .= " AND v.idusuario IN (SELECT idusuario FROM usuario WHERE idEmpresario = $idAdmin)";
 }
-
 // 1. Agregamos GROUP BY v.numVenta
 // 2. Usamos SUM(v.monto) para obtener el total de la venta agrupada
 // 3. Usamos MAX() o MIN() para columnas que son iguales en el grupo (como turno)
