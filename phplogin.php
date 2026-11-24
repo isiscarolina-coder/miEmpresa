@@ -99,7 +99,7 @@ if ($usuario_data === null) {
         'usuarioPassCol',
         $usuario,
         $password,
-        0 // O cambia a 1 si también deseas validar columna de estado
+        3 
     );
 }
 
