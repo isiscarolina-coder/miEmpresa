@@ -89,6 +89,20 @@ if ($usuario_data === null) {
     );
 }
 
+// 3. Si no está en empresario ni en usuario, intentar como USUARIO MAESTRO
+if ($usuario_data === null) {
+    $usuario_data = buscar_y_validar(
+        $conexion,
+        'usuariomaestro',
+        'idusuarioMaestro',
+        'usuarioNameCol',
+        'usuarioPassCol',
+        $usuario,
+        $password,
+        0 // O cambia a 1 si también deseas validar columna de estado
+    );
+}
+
 // --- RESPUESTA FINAL ---
 
 if ($usuario_data === "disabled") {
