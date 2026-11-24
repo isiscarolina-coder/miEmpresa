@@ -99,7 +99,7 @@ if ($usuario_data === null) {
         'usuarioPassCol',
         $usuario,
         $password,
-        3 
+        2 
     );
 }
 
