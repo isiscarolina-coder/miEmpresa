@@ -49,7 +49,7 @@ if ($idAdmin <= 0) {
 }
 
 // --- Consulta usando Prepared Statements (Más seguro) ---
-$sql = "SELECT idusuario, usdUsuario, usdPassV, usdEstado FROM usuario WHERE operador = 1 AND idEmpresario = ?";
+$sql = "SELECT idEmpresario, empNombre, empUsuario, empPassword FROM empresario WHERE idusuariomaestro = ?";
 $stmt = $conexion->prepare($sql);
 
 if ($stmt) {
@@ -60,10 +60,9 @@ if ($stmt) {
     $operadores = [];
     while ($row = $result->fetch_assoc()) {
         $operadores[] = [
-            "idusuario"  => (int)$row['idusuario'],
-            "usdUsuario" => $row['usdUsuario'],
-            "usdPassv"  => (int)$row['usdPassV'],
-            "usdEstado"  => (int)$row['usdEstado']
+            "idusuario"  => (int)$row['idEmpresario'],
+            "usdUsuario" => $row['empUsuario'],
+            "usdPassv"  => (int)$row['empPassword'],
         ];
     }
 
