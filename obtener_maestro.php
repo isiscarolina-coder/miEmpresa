@@ -42,10 +42,10 @@ if (!$connected) {
 mysqli_set_charset($conexion, "utf8");
 
 // --- Capturar y Validar ID ---
-$idAdmin = isset($_GET['idEmpresario']) ? (int)$_GET['idEmpresario'] : 0;
+$idAdmin = isset($_GET['idMaestro']) ? (int)$_GET['idMaestro'] : 0;
 
 if ($idAdmin <= 0) {
-    json_response(["status" => "error", "message" => "ID de administrador no proporcionado o inválido"], 400);
+    json_response(["status" => "error", "message" => "ID Maestro no proporcionado o inválido"], 400);
 }
 
 // --- Consulta usando Prepared Statements (Más seguro) ---
@@ -60,9 +60,9 @@ if ($stmt) {
     $operadores = [];
     while ($row = $result->fetch_assoc()) {
         $operadores[] = [
-            "idusuario"  => (int)$row['idEmpresario'],
-            "usdUsuario" => $row['empUsuario'],
-            "usdPassv"  => (int)$row['empPassword'],
+            "idEmpresario"  => (int)$row['idEmpresario'],
+            "empUsuario" => $row['empUsuario'],
+            "empPassword"  => (int)$row['empPassword'],
         ];
     }
 
